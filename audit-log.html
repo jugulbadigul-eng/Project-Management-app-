@@ -1,0 +1,1143 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log - Project Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #0c2d48;
+            --sidebar-hover: #145da0;
+            --sidebar-active: #0e86d4;
+            --sidebar-text: #b1d4e0;
+            --sidebar-text-active: #ffffff;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-sub: #94a3b8;
+            --primary: #0b5d73;
+            --primary-hover: #08495a;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0284c7;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: 100vh;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 50;
+            transition: margin-left 0.25s ease, transform 0.25s ease;
+        }
+
+        aside.sidebar.closed {
+            margin-left: -260px;
+        }
+
+        .sidebar-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .back-projects-link {
+            color: #93c5fd;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.15s;
+        }
+
+        .back-projects-link:hover {
+            color: #ffffff;
+        }
+
+
+        .sidebar-edge-toggle {
+            position: fixed;
+            top: 22px;
+            left: 246px;
+            width: 28px;
+            height: 28px;
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 60;
+            color: var(--text-muted);
+            box-shadow: var(--shadow-sm);
+            transition: left 0.25s ease, color 0.15s, transform 0.25s ease, border-color 0.15s;
+        }
+
+        .sidebar-edge-toggle:hover {
+            color: var(--primary);
+            border-color: var(--border-hover);
+        }
+
+        .sidebar-edge-toggle.closed {
+            left: 12px;
+            transform: rotate(180deg);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        .sidebar-top {
+            padding: 24px 20px 16px;
+        }
+
+        .sidebar-brand {
+            font-size: 17px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all 0.15s ease;
+        }
+
+        .nav-item a svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .nav-item a:hover {
+            color: #ffffff;
+            background-color: var(--sidebar-hover);
+        }
+
+        .nav-item.active a {
+            color: var(--sidebar-text-active);
+            background-color: var(--sidebar-active);
+            font-weight: 600;
+        }
+
+        .nav-item.active a svg {
+            opacity: 1;
+        }
+
+        .sidebar-bottom {
+            padding: 18px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #334155;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #ffffff;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .btn-sidebar-logout {
+            background: transparent;
+            border: none;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s, background-color 0.15s;
+        }
+
+        .btn-sidebar-logout:hover {
+            color: #ffffff;
+            background-color: var(--sidebar-hover);
+        }
+
+        .btn-sidebar-logout svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ── Main Content ── */
+        main.main-content {
+            flex: 1;
+            padding: 32px 40px;
+            max-width: 1360px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .page-title-group h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .page-title-group p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ── Stats Strip ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .stat-card-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-top: 6px;
+        }
+
+        /* ── Toolbar & Filters ── */
+        .toolbar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toolbar-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-sub);
+            pointer-events: none;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 9px 12px 9px 36px;
+            font-size: 13.5px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .search-box input:focus,
+        .filter-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 93, 115, 0.12);
+        }
+
+        .filter-select {
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        .toolbar-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-export:hover {
+            border-color: var(--border-hover);
+            background: #f8fafc;
+        }
+
+        .btn-clear-log {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-sm);
+            color: #b91c1c;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-clear-log:hover {
+            background: #fecaca;
+        }
+
+        /* ── Log Table Card ── */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .table-meta-bar {
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            background: #fcfdfe;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .log-table th {
+            text-align: left;
+            padding: 12px 18px;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .log-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .log-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .log-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        /* ── Badges & Chips ── */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+
+        .chip.created {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .chip.updated {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .chip.deleted {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .chip.status {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .chip.task {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .chip.milestone {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .chip.issue {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .user-cell {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .user-cell .u-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #475569;
+            font-size: 10.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meta-change-box {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .meta-change-field {
+            font-weight: 600;
+            color: var(--text-main);
+            text-transform: capitalize;
+        }
+
+        .meta-from {
+            text-decoration: line-through;
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        .meta-to {
+            color: #16a34a;
+            font-weight: 700;
+            background: #dcfce7;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            margin-bottom: 14px;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .empty-state p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            aside.sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(0);
+            }
+
+            aside.sidebar.closed {
+                transform: translateX(-100%);
+                margin-left: 0;
+            }
+
+            .sidebar-backdrop.active {
+                display: block;
+            }
+
+            .sidebar-edge-toggle {
+                display: flex;
+            }
+
+            main.main-content {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <a href="dashboard.html" class="back-projects-link">&larr; ALL PROJECTS</a>
+            <div class="sidebar-brand" id="sidebar-project-title">Project Manager</div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="project-dashboard.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="project-details.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Tasks
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timeline.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Timeline
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="add-diary-entry.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Diary Log
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="team-members.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Team Members
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="milestones.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                        </svg>
+                        Milestones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="issues.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Issues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="weekly-reports.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Weekly Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Project-report.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Report
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="audit-log.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        Audit Log
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar" id="avatar-circle">HA</div>
+                <div class="user-name" id="user-name-display">Hilman A</div>
+                <button class="btn-sidebar-logout" onclick="window.location.href='index.html'" title="Sign out">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <button class="sidebar-edge-toggle" id="sidebarEdgeToggle" onclick="toggleSidebar()" title="Toggle Sidebar"
+        type="button" aria-label="Toggle Sidebar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-title-group">
+                <h1>📋 Audit Log</h1>
+                <p>Real-time history of all changes made to tasks, milestones, and issues.</p>
+            </div>
+            <div class="header-actions">
+                <div id="notif-bell-container"></div>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-label">Total Activities</div>
+                <div class="stat-card-value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Logged Today</div>
+                <div class="stat-card-value" id="stat-today">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Task Changes</div>
+                <div class="stat-card-value" id="stat-tasks">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Milestones & Issues</div>
+                <div class="stat-card-value" id="stat-others">0</div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="toolbar-card">
+            <div class="toolbar-filters">
+                <div class="search-box">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" id="search-log" placeholder="Search by item name, user, or detail..."
+                        oninput="renderLog()">
+                </div>
+                <select id="filter-entity" class="filter-select" onchange="renderLog()">
+                    <option value="">All Types</option>
+                    <option value="Task">Tasks</option>
+                    <option value="Milestone">Milestones</option>
+                    <option value="Issue">Issues</option>
+                </select>
+                <select id="filter-action" class="filter-select" onchange="renderLog()">
+                    <option value="">All Actions</option>
+                    <option value="Created">Created</option>
+                    <option value="Updated">Updated</option>
+                    <option value="Deleted">Deleted</option>
+                    <option value="Status Changed">Status Changed</option>
+                </select>
+            </div>
+            <div class="toolbar-buttons">
+                <button class="btn-export" onclick="exportCSV()" title="Export audit logs to CSV">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export CSV
+                </button>
+                <button class="btn-clear-log" onclick="clearLog()" title="Clear local audit history">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Clear Log
+                </button>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="table-card">
+            <div class="table-meta-bar">
+                <span id="log-count">Showing 0 entries</span>
+                <span style="font-size: 12px; font-weight: normal; color: var(--text-sub);">Latest actions first</span>
+            </div>
+            <div class="table-container">
+                <table class="log-table" id="log-table">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Type</th>
+                            <th>Item</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-body"></tbody>
+                </table>
+            </div>
+            <div class="empty-state" id="empty-state" style="display:none;">
+                <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3>No audit log entries found</h3>
+                <p>Actions you perform across tasks, milestones, and issues will be recorded here.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sidebar controls script -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const isClosed = sidebar.classList.toggle('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.toggle('closed', isClosed);
+                edgeBtn.setAttribute('title', isClosed ? 'Open Sidebar' : 'Collapse Sidebar');
+            }
+            if (backdrop) {
+                backdrop.classList.toggle('active', !isClosed && window.innerWidth <= 768);
+            }
+            localStorage.setItem('sidebar_closed', isClosed);
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.add('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.add('closed');
+                edgeBtn.setAttribute('title', 'Open Sidebar');
+            }
+            if (backdrop) backdrop.classList.remove('active');
+            localStorage.setItem('sidebar_closed', 'true');
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.remove('closed');
+                edgeBtn.setAttribute('title', 'Collapse Sidebar');
+            }
+            if (backdrop && window.innerWidth <= 768) backdrop.classList.add('active');
+            localStorage.setItem('sidebar_closed', 'false');
+        }
+
+        // Initialize sidebar state on page load
+        (function initSidebar() {
+            const isClosed = localStorage.getItem('sidebar_closed') === 'true';
+            if (isClosed && window.innerWidth > 768) {
+                closeSidebar();
+            }
+        })();
+    </script>
+
+    <!-- Audit Log Viewer Logic -->
+    <script>
+        function getLog() {
+            if (window.AuditLog && typeof window.AuditLog.get === 'function') {
+                return window.AuditLog.get();
+            }
+            try {
+                return JSON.parse(localStorage.getItem('audit_log') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function formatTime(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return iso;
+            const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `${dateStr} ${timeStr}`;
+        }
+
+        function actionChip(action) {
+            const map = {
+                'Created': 'created',
+                'Updated': 'updated',
+                'Deleted': 'deleted',
+                'Status Changed': 'status'
+            };
+            return `<span class="chip ${map[action] || 'updated'}">${escapeHtml(action)}</span>`;
+        }
+
+        function entityChip(entity) {
+            const map = {
+                'Task': 'task',
+                'Milestone': 'milestone',
+                'Issue': 'issue'
+            };
+            return `<span class="chip ${map[entity] || 'task'}">${escapeHtml(entity)}</span>`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function updateStats(allLogs) {
+            const now = new Date();
+            const todayStr = now.toDateString();
+
+            const total = allLogs.length;
+            const todayCount = allLogs.filter(l => l.timestamp && new Date(l.timestamp).toDateString() === todayStr).length;
+            const tasksCount = allLogs.filter(l => l.entity === 'Task').length;
+            const othersCount = allLogs.filter(l => l.entity === 'Milestone' || l.entity === 'Issue').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-today').textContent = todayCount;
+            document.getElementById('stat-tasks').textContent = tasksCount;
+            document.getElementById('stat-others').textContent = othersCount;
+        }
+
+        function renderLog() {
+            const q = (document.getElementById('search-log').value || '').trim().toLowerCase();
+            const entityFilter = document.getElementById('filter-entity').value;
+            const actionFilter = document.getElementById('filter-action').value;
+
+            const allLogs = getLog();
+            updateStats(allLogs);
+
+            let filtered = allLogs;
+            if (q) {
+                filtered = filtered.filter(l =>
+                    (l.name || '').toLowerCase().includes(q) ||
+                    (l.user || '').toLowerCase().includes(q) ||
+                    (l.action || '').toLowerCase().includes(q) ||
+                    (l.entity || '').toLowerCase().includes(q) ||
+                    (l.meta && (l.meta.from || '').toLowerCase().includes(q)) ||
+                    (l.meta && (l.meta.to || '').toLowerCase().includes(q))
+                );
+            }
+            if (entityFilter) {
+                filtered = filtered.filter(l => l.entity === entityFilter);
+            }
+            if (actionFilter) {
+                filtered = filtered.filter(l => l.action === actionFilter);
+            }
+
+            const tbody = document.getElementById('log-body');
+            const empty = document.getElementById('empty-state');
+            const count = document.getElementById('log-count');
+            const table = document.getElementById('log-table');
+
+            count.textContent = `Showing ${filtered.length} entr${filtered.length !== 1 ? 'ies' : 'y'}`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                table.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            table.style.display = 'table';
+            empty.style.display = 'none';
+
+            tbody.innerHTML = filtered.map(l => {
+                let detail = '<span style="color:var(--text-sub);">—</span>';
+                if (l.meta && (l.meta.field || l.meta.from || l.meta.to)) {
+                    detail = `
+                        <div class="meta-change-box">
+                            <span class="meta-change-field">${escapeHtml(l.meta.field || 'change')}:</span>
+                            <span class="meta-from">${escapeHtml(l.meta.from || 'None')}</span>
+                            &rarr;
+                            <span class="meta-to">${escapeHtml(l.meta.to || 'None')}</span>
+                        </div>
+                    `;
+                }
+
+                const userName = escapeHtml(l.user || 'System');
+                const userInitial = userName.charAt(0).toUpperCase() || 'U';
+
+                return `<tr>
+                    <td style="white-space:nowrap;color:var(--text-muted);font-size:12px;" title="${escapeHtml(l.timestamp || '')}">
+                        ${formatTime(l.timestamp)}
+                    </td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="u-avatar">${userInitial}</div>
+                            <span>${userName}</span>
+                        </div>
+                    </td>
+                    <td>${actionChip(l.action)}</td>
+                    <td>${entityChip(l.entity)}</td>
+                    <td style="font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(l.name || '')}">
+                        ${escapeHtml(l.name || 'Untitled')}
+                    </td>
+                    <td>${detail}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function clearLog() {
+            if (!confirm('Clear all audit log entries? This action cannot be undone.')) return;
+            if (window.AuditLog && typeof window.AuditLog.clear === 'function') {
+                window.AuditLog.clear();
+            } else {
+                localStorage.removeItem('audit_log');
+            }
+            renderLog();
+        }
+
+        function exportCSV() {
+            const logs = getLog();
+            if (logs.length === 0) {
+                alert('No audit log entries to export.');
+                return;
+            }
+            const headers = ['Timestamp', 'User', 'Action', 'Entity', 'Item Name', 'Field', 'From', 'To'];
+            const rows = logs.map(l => [
+                `"${(l.timestamp || '').replace(/"/g, '""')}"`,
+                `"${(l.user || '').replace(/"/g, '""')}"`,
+                `"${(l.action || '').replace(/"/g, '""')}"`,
+                `"${(l.entity || '').replace(/"/g, '""')}"`,
+                `"${(l.name || '').replace(/"/g, '""')}"`,
+                `"${(l.meta?.field || '').replace(/"/g, '""')}"`,
+                `"${(l.meta?.from || '').replace(/"/g, '""')}"`,
+                `"${(l.meta?.to || '').replace(/"/g, '""')}"`
+            ]);
+            const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `audit_log_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sync project title in sidebar from localStorage
+            (function() {
+                try {
+                    const ap = localStorage.getItem('active_project');
+                    if (ap) {
+                        const proj = JSON.parse(ap);
+                        const brandEl = document.getElementById('sidebar-project-title');
+                        if (brandEl && proj.title) brandEl.textContent = proj.title;
+                    }
+                } catch(e) {}
+            })();
+            renderLog();
+        });
+    </script>
+
+    <!-- Dependencies -->
+    <script src="utils/audit-log.js"></script>
+    <script src="utils/notifications.js"></script>
+</body>
+
+</html>

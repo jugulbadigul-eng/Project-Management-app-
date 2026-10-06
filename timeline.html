@@ -1,0 +1,1187 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Timeline - Project Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #0c2d48;
+            --sidebar-hover: #145da0;
+            --sidebar-active: #0e86d4;
+            --sidebar-text: #b1d4e0;
+            --sidebar-text-active: #ffffff;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0b5d73;
+            --primary-hover: #084758;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --color-pending: #f59e0b;
+            --color-inprogress: #0284c7;
+            --color-completed: #10b981;
+            --color-onhold: #64748b;
+            --color-milestone: #a855f7;
+            --color-today: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: 100vh;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: margin-left 0.25s ease, transform 0.25s ease;
+        }
+
+        aside.sidebar.closed {
+            margin-left: -260px;
+        }
+
+        .sidebar-edge-toggle {
+            position: fixed;
+            top: 22px;
+            left: 246px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--sidebar-bg);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: var(--sidebar-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 60;
+            transition: left 0.25s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar-edge-toggle:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .sidebar-edge-toggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-edge-toggle.closed {
+            left: 12px;
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        .sidebar-edge-toggle.closed svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        .sidebar-backdrop.active {
+            display: block;
+        }
+
+        .sidebar-top {
+            padding: 24px 20px;
+        }
+
+        .back-projects-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            transition: color 0.15s ease;
+        }
+
+        .back-projects-link:hover {
+            color: #cbd5e1;
+        }
+
+        .sidebar-brand {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 28px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+        }
+
+        .nav-item a svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .nav-item a:hover {
+            color: #fff;
+            background-color: var(--sidebar-hover);
+        }
+
+        .nav-item.active a {
+            color: var(--sidebar-text-active);
+            background-color: var(--sidebar-active);
+            font-weight: 600;
+        }
+
+        .sidebar-bottom {
+            padding: 18px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #334155;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .user-name {
+            color: #f1f5f9;
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-sidebar-logout {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-sidebar-logout:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px 48px 60px;
+            min-width: 0;
+            overflow-x: hidden;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        /* ── Timeline Container Card ── */
+        .timeline-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            display: flex;
+            position: relative;
+        }
+
+        /* Left Side: Items Column */
+        .timeline-items-sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border);
+            background: #ffffff;
+            z-index: 10;
+        }
+
+        .items-header {
+            height: 48px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .item-row-title {
+            height: 52px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .item-indicator.milestone {
+            width: 9px;
+            height: 9px;
+            border-radius: 1px;
+            transform: rotate(45deg);
+            background-color: var(--color-milestone);
+        }
+
+        /* Right Side: Scrollable Gantt Grid */
+        .timeline-grid-wrap {
+            flex: 1;
+            overflow-x: auto;
+            position: relative;
+            background: #ffffff;
+        }
+
+        .timeline-grid {
+            position: relative;
+            min-width: 900px;
+        }
+
+        /* Header: two-row Gantt header */
+        .grid-header {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        /* Month band (top row) */
+        .grid-header-months {
+            display: flex;
+            height: 26px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .grid-month-label {
+            padding: 4px 10px;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            border-right: 2px solid var(--border);
+            white-space: nowrap;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            background: #f1f7fa;
+        }
+
+        /* Week band (bottom row) */
+        .grid-header-weeks {
+            display: flex;
+            height: 28px;
+        }
+
+        .grid-col-header {
+            flex: 1;
+            min-width: 130px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .grid-col-header .week-num {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .grid-col-header .week-dates {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .grid-col-header.is-current-week {
+            background: rgba(11, 93, 115, 0.05);
+        }
+
+        .grid-col-header.is-current-week .week-num {
+            color: var(--primary);
+        }
+
+        /* Grid Rows */
+        .grid-rows {
+            position: relative;
+        }
+
+        .grid-row {
+            height: 52px;
+            border-bottom: 1px solid var(--border-light);
+            position: relative;
+            display: flex;
+        }
+
+        .grid-cell {
+            flex: 1;
+            min-width: 130px;
+            border-right: 1px solid var(--border-light);
+            height: 100%;
+        }
+
+        .grid-cell.is-current-week {
+            background: rgba(11, 93, 115, 0.03);
+        }
+
+        /* Task Bars & Milestone Markers */
+        .task-bar {
+            position: absolute;
+            top: 10px;
+            height: 32px;
+            border-radius: 6px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.15s, box-shadow 0.15s;
+            z-index: 5;
+            cursor: pointer;
+        }
+
+        .task-bar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        }
+
+        .task-bar.pending {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .task-bar.in-progress {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .task-bar.completed {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .task-bar.on-hold {
+            background-color: #64748b;
+            color: #ffffff;
+            border: 1px solid #475569;
+        }
+
+
+        .milestone-bar {
+            position: absolute;
+            top: 17px;
+            width: 22px;
+            height: 18px;
+            background-color: var(--color-milestone);
+            border: 1px solid #9333ea;
+            border-radius: 4px;
+            z-index: 6;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(168, 85, 247, 0.3);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .milestone-bar.pending {
+            background-color: #f59e0b;
+            border-color: #d97706;
+        }
+
+        .milestone-bar.completed {
+            background-color: #10b981;
+            border-color: #059669;
+        }
+
+        .milestone-bar.on-hold {
+            background-color: #64748b;
+            border-color: #475569;
+        }
+
+        .milestone-bar.in-progress {
+            background-color: #0284c7;
+            border-color: #0369a1;
+        }
+
+        .milestone-bar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 9px rgba(168, 85, 247, 0.4);
+        }
+
+
+        .today-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--color-today);
+            z-index: 8;
+            pointer-events: none;
+        }
+
+        .timeline-scroll-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 14px;
+            background: #ffffff;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .scroll-arrow-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .scroll-arrow-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .scroll-track {
+            flex: 1;
+            margin: 0 16px;
+            height: 7px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .scroll-thumb {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 120px;
+            background: #94a3b8;
+            border-radius: 999px;
+            transition: background 0.15s;
+        }
+
+        .scroll-thumb:hover {
+            background: #64748b;
+        }
+
+        /* ── Legend Bar ── */
+        .timeline-legend {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        .legend-diamond {
+            width: 9px;
+            height: 9px;
+            transform: rotate(45deg);
+            background-color: var(--color-milestone);
+        }
+
+        .legend-line {
+            width: 2px;
+            height: 12px;
+            background-color: var(--color-today);
+            border-radius: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <a href="dashboard.html" class="back-projects-link">&larr; ALL PROJECTS</a>
+            <div class="sidebar-brand" id="sidebar-project-title">Project Manager</div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="project-dashboard.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="project-details.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Tasks
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="timeline.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Timeline
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="add-diary-entry.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Diary Log
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="team-members.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Team Members
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="milestones.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                        </svg>
+                        Milestones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="issues.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Issues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="weekly-reports.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Weekly Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Project-report.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="audit-log.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        Audit Log
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar" id="avatar-circle">AH</div>
+                <div class="user-name" id="user-name-display">Hilman A</div>
+                <button class="btn-sidebar-logout" onclick="handleLogout()" title="Sign out">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+    <button class="sidebar-edge-toggle" id="sidebarEdgeToggle" onclick="toggleSidebar()" title="Toggle Sidebar"
+        type="button" aria-label="Toggle Sidebar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Project Timeline</h1>
+        </div>
+
+        <div class="timeline-card">
+
+            <div class="timeline-items-sidebar">
+                <div class="items-header">Item</div>
+                <div id="items-list-container">
+                </div>
+            </div>
+
+            <!-- Right Scrollable Grid -->
+            <div class="timeline-grid-wrap" id="timelineScrollWrap">
+                <div class="timeline-grid" id="timelineGrid">
+                    <!-- Column Headers (Months + Weeks) -->
+                    <div class="grid-header" id="gridHeader">
+                        <div class="grid-header-months" id="gridHeaderMonths"></div>
+                        <div class="grid-header-weeks" id="gridHeaderWeeks"></div>
+                    </div>
+
+                    <!-- Grid Rows with Bars -->
+                    <div class="grid-rows" id="gridRows">
+                        <!-- Rows & task bars injected here -->
+                    </div>
+
+                    <!-- Red Today Marker Line -->
+                    <div class="today-line" id="todayLine"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Scrollbar Controls -->
+        <div class="timeline-scroll-controls">
+            <button class="scroll-arrow-btn" onclick="scrollTimeline(-150)" title="Scroll Left">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15 19l-7-7 7-7v14z" />
+                </svg>
+            </button>
+            <div class="scroll-track" id="scrollTrack" onclick="handleTrackClick(event)">
+                <div class="scroll-thumb" id="scrollThumb"></div>
+            </div>
+            <button class="scroll-arrow-btn" onclick="scrollTimeline(150)" title="Scroll Right">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 5l7 7-7 7V5z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Legend at Bottom -->
+        <div class="timeline-legend">
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: var(--color-pending);"></span>
+                <span>Pending</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: var(--color-inprogress);"></span>
+                <span>In Progress</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: var(--color-completed);"></span>
+                <span>Completed</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background-color: var(--color-onhold);"></span>
+                <span>On Hold</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-diamond"></span>
+                <span>Milestone</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-line"></span>
+                <span>Today</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Timeline Render Script -->
+    <script>
+        function handleLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                localStorage.removeItem('active_project');
+                window.location.href = 'index.html';
+            }
+        }
+        const MILESTONES_STORAGE_KEY = 'cached_milestones_data';
+
+        let timelineItems = [];
+        let dateColumns = [];
+        let timelineStartDate;
+        let timelineEndDate;
+        let totalDurationDays;
+
+        function parseMilestoneDate(value) {
+            if (!value || value === 'No date set') return null;
+            const isoDate = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (isoDate) return new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]));
+
+            const slashDate = String(value).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashDate) return new Date(Number(slashDate[3]), Number(slashDate[1]) - 1, Number(slashDate[2]));
+
+            const parts = String(value).trim().match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+            if (!parts) return null;
+            const month = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(parts[2].toLowerCase());
+            return month < 0 ? null : new Date(Number(parts[3]), month, Number(parts[1]));
+        }
+
+        function loadTimelineItems() {
+            let milestones = null;
+            try {
+                const cached = localStorage.getItem(MILESTONES_STORAGE_KEY);
+                if (cached !== null) {
+                    const parsed = JSON.parse(cached);
+                    milestones = Array.isArray(parsed) ? parsed : [];
+                }
+            } catch (e) { }
+
+            if (!Array.isArray(milestones)) milestones = [];
+            const milestoneItems = milestones.map(milestone => {
+                const date = parseMilestoneDate(milestone.date || milestone.target_date);
+                return {
+                    type: 'milestone',
+                    name: milestone.title || milestone.name || 'Untitled milestone',
+                    status: milestone.status || 'Pending',
+                    date: date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}` : null
+                };
+            });
+            timelineItems = milestoneItems;
+        }
+
+        function configureTimelineDates() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let project = {};
+            try {
+                project = JSON.parse(localStorage.getItem('active_project') || '{}');
+            } catch (e) { }
+
+            const projectStartDate = parseMilestoneDate(project.startDate);
+            const projectDeadline = parseMilestoneDate(project.dueDate);
+            const itemDates = timelineItems
+                .map(item => parseMilestoneDate(item.date))
+                .filter(Boolean);
+            const rangeStart = itemDates.reduce((earliest, date) => date < earliest ? date : earliest, projectStartDate || today);
+            const fallbackEnd = itemDates.reduce((latest, date) => date > latest ? date : latest, new Date(today));
+            fallbackEnd.setDate(fallbackEnd.getDate() + 42);
+            const rangeEnd = projectDeadline || fallbackEnd;
+            if (rangeEnd < rangeStart) rangeEnd.setTime(rangeStart.getTime());
+
+            const start = new Date(rangeStart);
+            const dayOfWeek = (start.getDay() + 6) % 7;
+            start.setDate(start.getDate() - dayOfWeek);
+
+            dateColumns = [];
+            const columnDate = new Date(start);
+            while (columnDate <= rangeEnd) {
+                dateColumns.push({ label: columnDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }), date: new Date(columnDate) });
+                columnDate.setDate(columnDate.getDate() + 7);
+            }
+            timelineStartDate = dateColumns[0].date;
+            timelineEndDate = new Date(dateColumns[dateColumns.length - 1].date);
+            timelineEndDate.setDate(timelineEndDate.getDate() + 7);
+            totalDurationDays = (timelineEndDate - timelineStartDate) / (1000 * 60 * 60 * 24);
+        }
+
+        function initTimeline() {
+            // Sync project title in sidebar from localStorage
+            (function() {
+                try {
+                    const ap = localStorage.getItem('active_project');
+                    if (ap) {
+                        const proj = JSON.parse(ap);
+                        const brandEl = document.getElementById('sidebar-project-title');
+                        if (brandEl && proj.title) brandEl.textContent = proj.title;
+                    }
+                } catch(e) {}
+            })();
+            loadTimelineItems();
+            configureTimelineDates();
+            renderLeftSidebar();
+            renderGridHeaders();
+            renderRowsAndBars();
+            positionTodayLine();
+            initCustomScroll();
+        }
+
+        window.addEventListener('storage', event => {
+            if (event.key !== MILESTONES_STORAGE_KEY) return;
+            loadTimelineItems();
+            configureTimelineDates();
+            renderLeftSidebar();
+            renderGridHeaders();
+            renderRowsAndBars();
+            positionTodayLine();
+        });
+
+        function renderLeftSidebar() {
+            const container = document.getElementById('items-list-container');
+            container.innerHTML = timelineItems.map(item => {
+                const isMilestone = item.type === 'milestone';
+                const statusClass = item.status ? item.status.toLowerCase().replace(/\s+/g, '-') : '';
+                const itemName = isMilestone && !item.date ? `${item.name} (No date set)` : item.name;
+                return `
+                    <div class="item-row-title" title="${escapeHtml(itemName)}">
+                        <span class="item-indicator ${isMilestone ? 'milestone' : ''}" style="${!isMilestone ? getStatusColor(statusClass) : ''}"></span>
+                        <span>${escapeHtml(itemName)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGridHeaders() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Build week columns
+            const weeksHtml = dateColumns.map((col, i) => {
+                const weekStart = col.date;
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+
+                const isCurrent = today >= weekStart && today <= weekEnd;
+
+                const fmtShort = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                const dateRange = `${fmtShort(weekStart)} – ${fmtShort(weekEnd)}`;
+
+                return `<div class="grid-col-header${isCurrent ? ' is-current-week' : ''}">
+                    <span class="week-num">W${i + 1}</span>
+                    <span class="week-dates">${dateRange}</span>
+                </div>`;
+            }).join('');
+
+            document.getElementById('gridHeaderWeeks').innerHTML = weeksHtml;
+
+            // Build month spans
+            const monthGroups = [];
+            dateColumns.forEach((col, i) => {
+                const monthName = col.date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+                if (monthGroups.length === 0 || monthGroups[monthGroups.length - 1].name !== monthName) {
+                    monthGroups.push({ name: monthName, count: 1 });
+                } else {
+                    monthGroups[monthGroups.length - 1].count++;
+                }
+            });
+
+            // Each week column is flex:1 min-width:130px → use flex-based widths
+            const monthsHtml = monthGroups.map(g => {
+                const pct = (g.count / dateColumns.length * 100).toFixed(4);
+                return `<div class="grid-month-label" style="flex: ${g.count} 0 0%; min-width:${g.count * 130}px;">${g.name}</div>`;
+            }).join('');
+
+            document.getElementById('gridHeaderMonths').innerHTML = monthsHtml;
+        }
+
+        function renderRowsAndBars() {
+            const rowsContainer = document.getElementById('gridRows');
+            rowsContainer.innerHTML = timelineItems.map((item, index) => {
+                let elementHtml = '';
+
+                if (item.type === 'task') {
+                    const start = new Date(item.startDate);
+                    const due = new Date(item.dueDate);
+                    const leftPercent = Math.max(0, ((start - timelineStartDate) / (1000 * 60 * 60 * 24)) / totalDurationDays * 100);
+                    const widthPercent = Math.max(4, ((due - start) / (1000 * 60 * 60 * 24)) / totalDurationDays * 100);
+                    const statusClass = (item.status || 'pending').toLowerCase().replace(/\s+/g, '-');
+
+                    elementHtml = `
+                        <div class="task-bar ${statusClass}" style="left: ${leftPercent.toFixed(2)}%; width: ${widthPercent.toFixed(2)}%;" title="${escapeHtml(item.name)} (${item.startDate} - ${item.dueDate})">
+                            ${escapeHtml(item.name)}
+                        </div>
+                    `;
+                } else if (item.type === 'milestone' && item.date) {
+                    const date = new Date(item.date);
+                    const leftPercent = ((date - timelineStartDate) / (1000 * 60 * 60 * 24)) / totalDurationDays * 100;
+                    const statusClass = (item.status || 'pending').toLowerCase().replace(/\s+/g, '-');
+
+                    elementHtml = `
+                        <div class="milestone-bar ${escapeHtml(statusClass)}" style="left: ${leftPercent.toFixed(2)}%;" title="Milestone: ${escapeHtml(item.name)} (${item.status}, ${item.date})"></div>
+                    `;
+                }
+
+                // Grid background cells (highlight current week)
+                const today2 = new Date(); today2.setHours(0, 0, 0, 0);
+                const cells = dateColumns.map(col => {
+                    const ws = col.date;
+                    const we = new Date(ws); we.setDate(we.getDate() + 6);
+                    const isCurrent = today2 >= ws && today2 <= we;
+                    return `<div class="grid-cell${isCurrent ? ' is-current-week' : ''}"></div>`;
+                }).join('');
+
+                return `
+                    <div class="grid-row">
+                        ${cells}
+                        ${elementHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function positionTodayLine() {
+            const today = new Date();
+            const todayPercent = ((today - timelineStartDate) / (1000 * 60 * 60 * 24)) / totalDurationDays * 100;
+            const line = document.getElementById('todayLine');
+            if (line) {
+                line.style.left = `${todayPercent}%`;
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'pending': return 'background-color: var(--color-pending);';
+                case 'in-progress': return 'background-color: var(--color-inprogress);';
+                case 'completed': return 'background-color: var(--color-completed);';
+                case 'on-hold': return 'background-color: var(--color-onhold);';
+                default: return 'background-color: var(--color-pending);';
+            }
+        }
+
+        // ── Custom Scroll Sync ──
+        function initCustomScroll() {
+            const wrap = document.getElementById('timelineScrollWrap');
+            const thumb = document.getElementById('scrollThumb');
+
+            wrap.addEventListener('scroll', () => {
+                const maxScroll = wrap.scrollWidth - wrap.clientWidth;
+                if (maxScroll <= 0) return;
+                const ratio = wrap.scrollLeft / maxScroll;
+                const trackWidth = document.getElementById('scrollTrack').clientWidth - thumb.clientWidth;
+                thumb.style.left = `${ratio * trackWidth}px`;
+            });
+        }
+
+        function scrollTimeline(amount) {
+            const wrap = document.getElementById('timelineScrollWrap');
+            wrap.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+
+        function handleTrackClick(e) {
+            const track = document.getElementById('scrollTrack');
+            const rect = track.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const ratio = clickX / rect.width;
+            const wrap = document.getElementById('timelineScrollWrap');
+            wrap.scrollTo({ left: ratio * (wrap.scrollWidth - wrap.clientWidth), behavior: 'smooth' });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        document.addEventListener('DOMContentLoaded', initTimeline);
+
+        function isDesktop() {
+            return window.innerWidth > 768;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+
+            if (!sidebar) return;
+
+            const isClosed = sidebar.classList.toggle('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.toggle('closed', isClosed);
+                edgeBtn.setAttribute('title', isClosed ? 'Open Sidebar' : 'Collapse Sidebar');
+            }
+            if (backdrop) {
+                backdrop.classList.toggle('active', !isClosed && !isDesktop());
+            }
+
+            if (isDesktop()) {
+                localStorage.setItem('sidebar_closed', isClosed ? 'true' : 'false');
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.add('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.add('closed');
+                edgeBtn.setAttribute('title', 'Open Sidebar');
+            }
+            if (backdrop) backdrop.classList.remove('active');
+            if (isDesktop()) {
+                localStorage.setItem('sidebar_closed', 'true');
+            }
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.remove('closed');
+                edgeBtn.setAttribute('title', 'Collapse Sidebar');
+            }
+            if (backdrop && !isDesktop()) {
+                backdrop.classList.add('active');
+            }
+            if (isDesktop()) {
+                localStorage.setItem('sidebar_closed', 'false');
+            }
+        }
+
+        (function initSidebar() {
+            if (!isDesktop()) {
+                closeSidebar();
+            } else {
+                if (localStorage.getItem('sidebar_closed') === 'true') {
+                    closeSidebar();
+                }
+            }
+
+            window.addEventListener('resize', () => {
+                const backdrop = document.getElementById('sidebarBackdrop');
+                if (isDesktop() && backdrop) {
+                    backdrop.classList.remove('active');
+                }
+            });
+        })();
+    </script>
+</body>
+
+
+</html>

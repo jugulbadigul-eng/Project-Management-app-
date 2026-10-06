@@ -1,0 +1,1129 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Diary Entry - Project Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #0c2d48;
+            --sidebar-hover: #145da0;
+            --sidebar-active: #0e86d4;
+            --sidebar-text: #b1d4e0;
+            --sidebar-text-active: #ffffff;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0b5d73;
+            --primary-hover: #084758;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: 100vh;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: margin-left 0.25s ease, transform 0.25s ease;
+        }
+
+        aside.sidebar.closed {
+            margin-left: -260px;
+        }
+
+        .sidebar-edge-toggle {
+            position: fixed;
+            top: 22px;
+            left: 246px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--sidebar-bg);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: var(--sidebar-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 60;
+            transition: left 0.25s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar-edge-toggle:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .sidebar-edge-toggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-edge-toggle.closed {
+            left: 12px;
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        .sidebar-edge-toggle.closed svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        .sidebar-top {
+            padding: 24px 20px;
+        }
+
+        .back-projects-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            transition: color 0.15s ease;
+        }
+
+        .back-projects-link:hover {
+            color: #cbd5e1;
+        }
+
+        .sidebar-brand {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 28px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all 0.15s ease;
+        }
+
+        .nav-item a svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .nav-item a:hover {
+            color: #ffffff;
+            background-color: var(--sidebar-hover);
+        }
+
+        .nav-item.active a {
+            color: var(--sidebar-text-active);
+            background-color: var(--sidebar-active);
+            font-weight: 600;
+        }
+
+        /* Sidebar Bottom */
+        .sidebar-bottom {
+            padding: 18px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #334155;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .user-name {
+            color: #f1f5f9;
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-sidebar-logout {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-sidebar-logout:hover {
+            color: #ef4444;
+        }
+
+        /* Main Content */
+        main.main-content {
+            flex: 1;
+            padding: 36px 44px 60px;
+            max-width: 100%;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+
+        .btn-back:hover {
+            color: var(--primary);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 32px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            background-color: #ffffff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            outline: none;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 93, 115, 0.12);
+        }
+
+        .form-group textarea {
+            min-height: 85px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .btn-upload {
+            align-self: flex-start;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-upload:hover {
+            background-color: #f1f5f9;
+            box-shadow: var(--shadow-card);
+        }
+
+        .btn-save {
+            width: 100%;
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+
+        .btn-save:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Table & List View Styles */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .table-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th, .data-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table th {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background-color: #ffffff;
+        }
+
+        .data-table td {
+            font-size: 14px;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-in-progress { background: #e0f2fe; color: #0284c7; }
+        .badge-completed { background: #dcfce7; color: #16a34a; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-on-hold { background: #f1f5f9; color: #64748b; }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+        }
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .btn-icon:hover { color: var(--text-main); }
+        .btn-icon.delete:hover { color: #ef4444; }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            aside.sidebar {
+                width: 100%;
+                height: auto;
+                min-height: unset;
+                position: relative;
+            }
+
+            main.main-content {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <a href="dashboard.html" class="back-projects-link">&larr; ALL PROJECTS</a>
+            <div class="sidebar-brand" id="sidebar-project-title">Project Manager</div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="project-dashboard.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="project-details.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Tasks
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timeline.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Timeline
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="add-diary-entry.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Diary Log
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="team-members.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Team Members
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="milestones.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                        </svg>
+                        Milestones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="issues.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Issues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="weekly-reports.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Weekly Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Project-report.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="audit-log.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        Audit Log
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar">AH</div>
+                <div class="user-name">Hilman A</div>
+                <button class="btn-sidebar-logout" onclick="window.location.href='index.html'" title="Sign out">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+    <button class="sidebar-edge-toggle" id="sidebarEdgeToggle" onclick="toggleSidebar()" title="Toggle Sidebar"
+        type="button" aria-label="Toggle Sidebar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <!-- Main Content Form Area -->
+    <main class="main-content">
+        <!-- List View -->
+        <div id="listView">
+            <div class="page-header">
+                <h1 class="page-title" style="margin-bottom: 0;">Diary Log</h1>
+                <button class="btn-primary" onclick="showFormView()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Add Entry
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-toolbar" style="display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; background: #fff; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card);">
+                <div style="flex: 1; min-width: 200px; position: relative;">
+                    <svg style="position: absolute; left: 12px; top: 10px; width: 16px; height: 16px; color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input type="text" id="searchQuery" placeholder="Search diary logs..." style="width: 100%; padding: 10px 14px 10px 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);" oninput="renderDiaryTable()">
+                </div>
+                <input type="date" id="startDate" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);" onchange="renderDiaryTable()">
+                <input type="date" id="endDate" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);" onchange="renderDiaryTable()">
+                <select id="statusFilter" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);" onchange="renderDiaryTable()">
+                    <option value="">All Statuses</option>
+                    <option value="Completed">Completed</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Pending">Pending</option>
+                </select>
+                <button type="button" class="btn-primary" onclick="resetFilters()" style="padding: 10px 14px; background-color: #f1f5f9; color: var(--text-main);">Reset</button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Activity</th>
+                            <th>Progress</th>
+                            <th>Issues</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="diaryTableBody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Form View -->
+        <div id="formView" style="display: none;">
+            <button onclick="showListView()" class="btn-back" style="background:none; border:none; padding:0;">&larr; Back to Diary Log</button>
+            <h1 class="page-title">Add Diary Entry</h1>
+
+            <form class="form-card" id="diary-form" onsubmit="saveDiaryEntry(event)">
+                <input type="hidden" id="entry-id">
+                <!-- Row 1: Date & Status -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="entry-date">Date *</label>
+                    <input type="date" id="entry-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="entry-status">Status</label>
+                    <select id="entry-status">
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="On Hold">On Hold</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Activity -->
+            <div class="form-group">
+                <label for="entry-activity">Activity *</label>
+                <input type="text" id="entry-activity" placeholder="e.g. Database Design" required>
+            </div>
+
+            <!-- Work Completed -->
+            <div class="form-group">
+                <label for="entry-completed">Work Completed</label>
+                <textarea id="entry-completed" placeholder="Describe what was completed..."></textarea>
+            </div>
+
+            <!-- Progress -->
+            <div class="form-group">
+                <label for="entry-progress">Progress</label>
+                <input type="text" id="entry-progress"
+                    placeholder="e.g. Database structure approximately 80% completed">
+            </div>
+
+            <!-- Problems / Issues -->
+            <div class="form-group">
+                <label for="entry-issues">Problems / Issues</label>
+                <textarea id="entry-issues" placeholder="Any issues encountered..."></textarea>
+            </div>
+
+            <!-- Action Taken -->
+            <div class="form-group">
+                <label for="entry-action">Action Taken</label>
+                <textarea id="entry-action" placeholder="What was done to resolve issues..."></textarea>
+            </div>
+
+            <!-- Next Step -->
+            <div class="form-group">
+                <label for="entry-next">Next Step</label>
+                <textarea id="entry-next" placeholder="What needs to be done next..."></textarea>
+            </div>
+
+            <!-- Attachments -->
+            <div class="form-group">
+                <label>Attachments</label>
+                <input type="file" id="file-upload" style="display: none;" onchange="handleFileSelected(event)">
+                <button type="button" class="btn-upload" onclick="document.getElementById('file-upload').click()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        style="margin-right: 4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Upload File / Image
+                </button>
+                <span id="file-name-display" style="font-size: 13px; color: #64748b;"></span>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-save">Save Entry</button>
+        </form>
+        </div>
+    </main>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ── Supabase Config ─────────────────────────────────────────
+        const SUPABASE_URL = 'https://umdccvvyjyuepmzmqqfn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZGNjdnZ5anl1ZXBtem1xcWZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjA5MTEsImV4cCI6MjEwNTA5NjkxMX0.oLe9xzu-JlpfKQ1oFhKnVUux5XxsgRNEz4btnzFmJqU';
+        let db = null;
+        try {
+            if (window.supabase && window.supabase.createClient) {
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } else { console.warn('Supabase SDK not loaded'); }
+        } catch(e) { console.warn('Supabase init failed', e); }
+
+        let allEntries = [];
+        const DIARY_CACHE_KEY = 'cached_diary_entries';
+
+        function loadLocalDiary() {
+            try {
+                const raw = localStorage.getItem(DIARY_CACHE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) { return []; }
+        }
+
+        function saveLocalDiary(list) {
+            try {
+                localStorage.setItem(DIARY_CACHE_KEY, JSON.stringify(list));
+            } catch(e) {}
+        }
+
+        function normalizeDiary(d) {
+            let extra = {};
+            if (d.description && typeof d.description === 'string' && d.description.startsWith('{')) {
+                try { extra = JSON.parse(d.description); } catch (e) {}
+            }
+            return {
+                id: d.diary_id || d.id,
+                diary_id: d.diary_id || d.id,
+                date: d.log_date || d.date || (d.created_at ? d.created_at.split('T')[0] : new Date().toISOString().split('T')[0]),
+                status: extra.status || d.status || 'In Progress',
+                activity: d.title || d.activity || 'Diary Entry',
+                work_completed: extra.work_completed || d.work_completed || d.workCompleted || (extra.status ? '' : d.description) || '',
+                progress: extra.progress || d.progress || '',
+                problems: extra.problems || d.problems || '',
+                action_taken: extra.action_taken || d.action_taken || d.actionTaken || '',
+                next_step: extra.next_step || d.next_step || d.nextStep || ''
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Sync project title in sidebar from localStorage
+            (function() {
+                try {
+                    const ap = localStorage.getItem('active_project');
+                    if (ap) {
+                        const proj = JSON.parse(ap);
+                        const brandEl = document.getElementById('sidebar-project-title');
+                        if (brandEl && proj.title) brandEl.textContent = proj.title;
+                    }
+                } catch(e) {}
+            })();
+            // Load diary entries from Supabase
+            try {
+                if (db) {
+                    let { data, error } = await db.from('diary_logs').select('*').order('diary_id', { ascending: false });
+                    if (error) {
+                        const fallback = await db.from('diary_entries').select('*');
+                        data = fallback.data;
+                    }
+                    if (data && data.length > 0) {
+                        allEntries = data.map(normalizeDiary);
+                    } else {
+                        allEntries = loadLocalDiary();
+                    }
+                } else {
+                    allEntries = loadLocalDiary();
+                }
+            } catch (err) {
+                console.warn('Load diary notice:', err);
+                allEntries = loadLocalDiary();
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            const dateInput = document.getElementById('entry-date');
+            if (dateInput) dateInput.value = today;
+
+            renderDiaryTable();
+        });
+
+        function showFormView(entryId = null) {
+            document.getElementById('listView').style.display = 'none';
+            document.getElementById('formView').style.display = 'block';
+
+            const form = document.getElementById('diary-form');
+            form.reset();
+
+            if (entryId) {
+                document.querySelector('#formView .page-title').textContent = 'Edit Diary Entry';
+                const entry = allEntries.find(e => (e.diary_id || e.id) == entryId);
+                
+                if (entry) {
+                    document.getElementById('entry-id').value = entry.diary_id || entry.id;
+                    document.getElementById('entry-date').value = entry.date;
+                    document.getElementById('entry-status').value = entry.status;
+                    document.getElementById('entry-activity').value = entry.activity || '';
+                    document.getElementById('entry-completed').value = entry.work_completed || '';
+                    document.getElementById('entry-progress').value = entry.progress || '';
+                    document.getElementById('entry-issues').value = entry.problems || '';
+                    document.getElementById('entry-action').value = entry.action_taken || '';
+                    document.getElementById('entry-next').value = entry.next_step || '';
+                }
+            } else {
+                document.querySelector('#formView .page-title').textContent = 'Add Diary Entry';
+                document.getElementById('entry-id').value = '';
+                document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('entry-status').value = 'In Progress';
+                document.getElementById('file-name-display').textContent = '';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showListView() {
+            document.getElementById('formView').style.display = 'none';
+            document.getElementById('listView').style.display = 'block';
+            renderDiaryTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Completed': return 'badge-completed';
+                case 'In Progress': return 'badge-in-progress';
+                case 'Pending': return 'badge-pending';
+                default: return 'badge-on-hold';
+            }
+        }
+
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return '';
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            try {
+                return new Date(dateStr + (dateStr.includes('T') ? '' : 'T00:00:00')).toLocaleDateString('en-GB', options);
+            } catch(e) {
+                return dateStr;
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('statusFilter').value = '';
+            renderDiaryTable();
+        }
+
+        function renderDiaryTable() {
+            const tbody = document.getElementById('diaryTableBody');
+            let entries = [...allEntries];
+            
+            // Filter logic
+            const query = document.getElementById('searchQuery').value.toLowerCase();
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            const status = document.getElementById('statusFilter').value;
+
+            if (query) {
+                entries = entries.filter(e => (e.activity || '').toLowerCase().includes(query) || (e.progress && e.progress.toLowerCase().includes(query)));
+            }
+            if (status) {
+                entries = entries.filter(e => e.status === status);
+            }
+            if (start) {
+                entries = entries.filter(e => e.date >= start);
+            }
+            if (end) {
+                entries = entries.filter(e => e.date <= end);
+            }
+
+            tbody.innerHTML = '';
+
+            if (entries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 36px 20px;">No diary entries found. <button type="button" class="btn-primary" onclick="showFormView()" style="display:inline-flex; padding:6px 14px; margin-left:8px; font-size:13px; cursor:pointer;">+ Add Entry</button></td></tr>';
+                return;
+            }
+
+            entries.forEach(entry => {
+                const tr = document.createElement('tr');
+                const rowId = entry.diary_id || entry.id;
+                tr.innerHTML = `
+                    <td>${formatDateDisplay(entry.date)}</td>
+                    <td style="font-weight: 500;">${entry.activity}</td>
+                    <td style="color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.progress || '-'}</td>
+                    <td style="color: var(--text-muted); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.problems || '-'}</td>
+                    <td><span class="badge ${getStatusBadgeClass(entry.status)}">${entry.status}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-icon" title="View / Edit" onclick="showFormView('${rowId}')">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                            <button class="btn-icon" title="Edit" onclick="showFormView('${rowId}')">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                            <button class="btn-icon delete" title="Delete" onclick="deleteEntry('${rowId}')">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteEntry(id) {
+            if (!confirm('Are you sure you want to delete this diary entry?')) return;
+            try {
+                if (db) {
+                    const { error } = await db.from('diary_logs').delete().eq('diary_id', id);
+                    if (error) {
+                        await db.from('diary_entries').delete().eq('id', id);
+                    }
+                }
+            } catch (err) {
+                console.warn('Delete diary notice:', err);
+            }
+            allEntries = allEntries.filter(e => (e.diary_id || e.id) != id);
+            saveLocalDiary(allEntries);
+            renderDiaryTable();
+        }
+
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            const display = document.getElementById('file-name-display');
+            if (file && display) {
+                display.textContent = 'Selected: ' + file.name;
+            }
+        }
+
+        async function saveDiaryEntry(event) {
+            event.preventDefault();
+
+            const entryId = document.getElementById('entry-id').value;
+
+            const entryData = {
+                date:          document.getElementById('entry-date').value,
+                status:        document.getElementById('entry-status').value,
+                activity:      document.getElementById('entry-activity').value.trim(),
+                work_completed: document.getElementById('entry-completed').value.trim(),
+                progress:      document.getElementById('entry-progress').value.trim(),
+                problems:      document.getElementById('entry-issues').value.trim(),
+                action_taken:  document.getElementById('entry-action').value.trim(),
+                next_step:     document.getElementById('entry-next').value.trim()
+            };
+
+            const extra = {
+                status: entryData.status,
+                work_completed: entryData.work_completed,
+                progress: entryData.progress,
+                problems: entryData.problems,
+                action_taken: entryData.action_taken,
+                next_step: entryData.next_step
+            };
+
+            const dbPayload = {
+                title: entryData.activity,
+                description: JSON.stringify(extra),
+                log_date: entryData.date
+            };
+
+            const btn = document.querySelector('.btn-save');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Saving...';
+            }
+
+            try {
+                if (entryId) {
+                    if (db) {
+                        const { error } = await db.from('diary_logs').update(dbPayload).eq('diary_id', entryId);
+                        if (error) {
+                            console.warn('Supabase diary update notice (saving locally):', error.message);
+                        }
+                    }
+                    const idx = allEntries.findIndex(e => (e.diary_id || e.id) == entryId);
+                    if (idx > -1) {
+                        allEntries[idx] = { ...allEntries[idx], ...entryData, id: entryId, diary_id: entryId };
+                    }
+                } else {
+                    let newItem = null;
+                    if (db) {
+                        const { data, error } = await db.from('diary_logs').insert([dbPayload]).select().single();
+                        if (error) {
+                            console.warn('Supabase diary insert notice (saving locally):', error.message);
+                            newItem = { id: Date.now().toString(), diary_id: Date.now().toString(), ...entryData };
+                        } else {
+                            newItem = normalizeDiary(data);
+                        }
+                    } else {
+                        newItem = { id: Date.now().toString(), diary_id: Date.now().toString(), ...entryData };
+                    }
+                    allEntries.unshift(newItem);
+                }
+                saveLocalDiary(allEntries);
+                alert('Diary entry saved successfully!');
+                showListView();
+            } catch (err) {
+                console.error('Save diary error:', err);
+                if (!entryId) {
+                    allEntries.unshift({ id: Date.now().toString(), diary_id: Date.now().toString(), ...entryData });
+                }
+                saveLocalDiary(allEntries);
+                alert('Diary entry saved successfully!');
+                showListView();
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Save Entry';
+                }
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const isClosed = sidebar.classList.toggle('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.toggle('closed', isClosed);
+                edgeBtn.setAttribute('title', isClosed ? 'Open Sidebar' : 'Collapse Sidebar');
+            }
+            if (backdrop) {
+                backdrop.classList.toggle('active', !isClosed && window.innerWidth <= 768);
+            }
+            localStorage.setItem('sidebar_closed', isClosed);
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.add('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.add('closed');
+                edgeBtn.setAttribute('title', 'Open Sidebar');
+            }
+            if (backdrop) backdrop.classList.remove('active');
+            localStorage.setItem('sidebar_closed', 'true');
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.remove('closed');
+                edgeBtn.setAttribute('title', 'Collapse Sidebar');
+            }
+            if (backdrop && window.innerWidth <= 768) backdrop.classList.add('active');
+            localStorage.setItem('sidebar_closed', 'false');
+        }
+
+        (function initSidebar() {
+            const isClosed = localStorage.getItem('sidebar_closed') === 'true';
+            if (isClosed && window.innerWidth > 768) {
+                closeSidebar();
+            }
+        })();
+    </script>
+</body>
+</html>

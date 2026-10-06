@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Hub | sign in</title>
+    <style>
+        :root {
+            -ink: #14212b;
+            --muted: #6b7b86;
+            --line: #d9e2e7;
+            --surface: #ffffff;
+            --canvas: #f4f8fa;
+            --brand: #117aa3;
+            --brand-dark: #0d6387;
+            --brand-soft: #e7f4f8;
+            --error: #b42318;
+            --success: #16794b;
+            --shadow: 0 24px 70px rgba(25, 52, 67, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 20% 10%, rgba(17, 122, 163, 0.09), transparent 30%),
+                linear-gradient(135deg, #f8fbfc 0%, var(--canvas) 58%, #eef5f7 100%);
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+
+        .auth shell {
+            width: min(100%, 430px);
+            animation: rise-in 500ms ease both;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            color: var(--brand-dark);
+            font: 700 15px/1.2Arial, sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            color: white;
+            background: var(--brand);
+            border-radius: 8px;
+            box-shadow: 0 7px 16px rgba(17, 122, 163, 0.2);
+            font-size: 16px;
+        }
+
+        .card {
+            position: relative;
+            padding: 36px 32px 30px;
+            background: var(--surface);
+            border: 1px solid rgba(167, 187, 197, 0.7);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .preview-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6 px;
+            padding: 6px 10px;
+            color: #71818b;
+            background: #f1f5f7;
+            border-radius: 6px;
+            font: 12px Arial, sans-serif;
+        }
+
+        .card h1 {
+            margin: 4px 0 28px;
+            text-align: center;
+            font-size: clamp(28px, 7vw, 34px);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin: 0 0 18px;
+            border-bottom: 1px solid var(--line);
+            padding: 0;
+            background: #f8fafb;
+            border-radius: 9px;
+            font: 600 13px Arial, sans-serif;
+        }
+
+        .tab {
+            padding: 10px 0;
+            color: var(--muted);
+            background: transparent;
+            border: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font: inherit;
+
+        }
+
+
+        .tab[aria-selected="true"] {
+            color: var(--ink);
+            background: white;
+            box-shadow: 0 2px 7px rgba(35, 63, 73, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+
+        /* Form label styling */
+        label {
+            display: block;
+            margin-bottom: var(--spacing-xxs);
+            /* 7px */
+            color: var(--ink);
+            font-weight: 500;
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Wrapper for input for positioning */
+        .input-wrap {
+            position: relative;
+        }
+
+        /* Input field styling */
+        input {
+            width: 100%;
+            height: 44px;
+            padding: 0 13px;
+            color: var(--ink);
+            background: #fff;
+            border: 1px solid #cbd8de;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            transition: border-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        /* Accessible focus outline */
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        input[type=password] {
+            padding-right: 46px;
+        }
+
+        input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(17, 122, 163, 0.13);
+        }
+
+        input[aria-invalid="true"] {
+            border-color: var(--error);
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            width: 34px;
+            height: 34px;
+            transform: translateY(-50%);
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .toggle-password:hover {
+            background: #f0f5f7;
+        }
+
+        .field-error {
+            min-height: 17px;
+            margin: 5px 0 0;
+            color: var(--error);
+            font: 12 px Arial, sans-serif;
+        }
+
+        .row-between {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin: -2px 0 20px;
+            font: 13px Arial, sans-serif;
+        }
+
+
+        .check {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--muted);
+        }
+
+        .check input {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--brand);
+        }
+
+
+
+        a {
+            color: var(--brand-dark);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .primary-button,
+        .google-button {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            font: 700 15px Arial, sans-serif;
+            transition: transform 160ms ease, background 160ms ease, box shadow 160ms ease;
+
+        }
+
+        .primary-button {
+            color: white;
+            background: var(--brand);
+            border: 1 px solid var(--brand);
+            box-shadow: 0 7px 14px rgba(17, 122, 163, 0.25);
+        }
+
+        .primary-button:hover {
+            background: var(--brand-dark);
+            transform: translateY(-1px);
+        }
+
+        .primary-button:active {
+            transform: translateY(0);
+        }
+
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+            color: #85939b;
+            font: 13px Arial, sans-serif;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: var(--line);
+        }
+
+        .google-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            color: #536570;
+            background: white;
+            border: 1 px solid var(--line);
+
+        }
+
+        .google-button:hover {
+            background: #f7fafb;
+            border-color: #b9cbd3;
+        }
+
+        .google-icon {
+            font-weight: 700;
+            color: #4285f4;
+        }
+
+        .switch-copy {
+            margin: 24px 0 0;
+            text-align: center;
+            color: var(--muted);
+            font: 13px Arial, sans-serif;
+        }
+
+        .switch-copy a {
+            font-weight: 700;
+        }
+
+        .message {
+            display: none;
+            padding: 11px 12px;
+            margin: 16px;
+            border-radius: 7px;
+            font: 13px/1.4 Arial, sans-serif;
+        }
+
+        .message.visible {
+            display: block;
+        }
+
+        .message.error {
+            color: var(--error);
+            background: #fef2f2;
+            border: 1px solid #fac8c4;
+        }
+
+        .message.success {
+            color: var(--success);
+            background: #edf9f2;
+            border: 1px solid #b9e4c9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18 px;
+            font: 13px Arial, sans-serif;
+        }
+
+        @keyframes rise-in {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 34px 20px 25px;
+            }
+
+            .preview-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="auth-shell">
+        <div class="brand"><span class="brand-mark">p</span> Project Hub</div>
+        <section class="card" aria-labelledby="page-title">
+            <div class="preview-badge" aria-label="Preview mode"> Preview</div>
+            <h1 id="page-title">Sign up</h1>
+
+
+
+            <div class="tabs" role="tablist" aria-label="Authentication mode">
+                <button class="tab" id="login-tab" type="button" role="tab" aria-selected="true">Log in</button>
+                <button class="tab" id="signup-tab" type="button" role="tab" aria-selected="false">Sign up</button>
+            </div>
+
+            <div id="form-message" class="message" role="status" aria-live="polite"></div>
+
+            <form id="auth-form" novalidate>
+                <div class="form-group">
+                    <label for="identity" id="identity-label">Username or email</label>
+                    <input id="identity" name="identity" type="text" autocomplete="username"
+                        placeholder="you@example.com" required />
+                    <p class="field-error" id="identity-error"></p>
+                </div>
+
+                <div class="form-group" id="name-group" hidden>
+                    <label for="full-name">Full name</label>
+                    <input id="full-name" name="full-name" type="text" autocomplete="name" placeholder="Your name" />
+                    <p class="field-error" id="name-error"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <input id="password" name="password" type="password" autocomplete="current-password"
+                            placeholder="Enter your password" required />
+                        <button class="toggle-password" type="button" aria-label="Show password">◉</button>
+                    </div>
+                    <p class="field-error" id="password-error"></p>
+                </div>
+
+                <div class="row-between" id="login-options">
+                    <label class="check"><input type="checkbox" name="remember" /> Remember me</label>
+                    <a href="#forgot" id="forgot-link">Forgot password?</a>
+                </div>
+
+                <button class="primary-button" type="submit" id="submit-button">Log in</button>
+            </form>
+
+            <div class="divider" id="social-divider">or</div>
+
+
+            <p class="switch-copy" id="switch-copy">Don't have an account? <a href="#signup" id="switch-link">Sign
+                    up</a></p>
+        </section>
+    </main>
+    <!-- Supabase JS SDK (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+        // Guard: abort if Supabase CDN failed to load
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+            var msg = document.getElementById('form-message');
+            if (msg) { msg.textContent = 'Auth library failed to load. Please refresh.'; msg.className = 'message visible error'; }
+            return;
+        }
+
+        // Initialise the Supabase client
+        let db = null;
+        try {
+            if (window.supabase && window.supabase.createClient) {
+                db = window.supabase.createClient(
+                    'https://umdccvvyjyuepmzmqqfn.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZGNjdnZ5anl1ZXBtem1xcWZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjA5MTEsImV4cCI6MjEwNTA5NjkxMX0.oLe9xzu-JlpfKQ1oFhKnVUux5XxsgRNEz4btnzFmJqU'
+                );
+            }
+        } catch(e) { console.warn('Supabase init failed', e); }
+
+        const elements = {
+            title: document.querySelector('#page-title'),
+            form: document.querySelector('#auth-form'),
+            identity: document.querySelector('#identity'),
+            identityLabel: document.querySelector('#identity-label'),
+            nameGroup: document.querySelector('#name-group'),
+            name: document.querySelector('#full-name'),
+            password: document.querySelector('#password'),
+            loginOptions: document.querySelector('#login-options'),
+            submit: document.querySelector('#submit-button'),
+            divider: document.querySelector('#social-divider'),
+            google: document.querySelector('#google-button'),
+            switchCopy: document.querySelector('#switch-copy'),
+            switchLink: document.querySelector('#switch-link'),
+            message: document.querySelector('#form-message'),
+            loginTab: document.querySelector('#login-tab'),
+            signupTab: document.querySelector('#signup-tab'),
+            forgot: document.querySelector('#forgot-link')
+        };
+
+        let mode = 'login';
+
+        function showMessage(text, type) {
+            elements.message.textContent = text;
+            elements.message.className = `message visible ${type}`;
+        }
+
+        function clearMessage() {
+            elements.message.textContent = '';
+            elements.message.className = 'message';
+        }
+
+        function setError(input, errorId, text) {
+            input.setAttribute('aria-invalid', text ? 'true' : 'false');
+            document.querySelector(`#${errorId}`).textContent = text;
+        }
+
+        function setMode(nextMode) {
+            mode = nextMode;
+            const isSignup = mode === 'signup';
+            elements.title.textContent = isSignup ? 'Create your account' : 'Sign in';
+            elements.identityLabel.textContent = isSignup ? 'Email address' : 'Username or email';
+            elements.identity.placeholder = isSignup ? 'you@example.com' : 'you@example.com';
+            elements.password.autocomplete = isSignup ? 'new-password' : 'current-password';
+            elements.nameGroup.hidden = !isSignup;
+            elements.loginOptions.hidden = isSignup;
+            elements.submit.textContent = isSignup ? 'Create account' : 'Log in';
+            elements.switchCopy.innerHTML = isSignup
+                ? 'Already have an account? <a href="#login" id="switch-link">Log in</a>'
+                : 'Don\'t have an account? <a href="#signup" id="switch-link">Sign up</a>';
+            elements.loginTab.setAttribute('aria-selected', String(!isSignup));
+            elements.signupTab.setAttribute('aria-selected', String(isSignup));
+            elements.switchLink = document.querySelector('#switch-link');
+            clearMessage();
+            clearErrors();
+        }
+
+        function clearErrors() {
+            setError(elements.identity, 'identity-error', '');
+            setError(elements.password, 'password-error', '');
+            setError(elements.name, 'name-error', '');
+        }
+
+        function validate() {
+            clearErrors();
+            let valid = true;
+            if (!elements.identity.value.trim()) {
+                setError(elements.identity, 'identity-error', mode === 'signup' ? 'Enter your email address.' : 'Enter your username or email.');
+                valid = false;
+            }
+            if (mode === 'signup' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(elements.identity.value.trim())) {
+                setError(elements.identity, 'identity-error', 'Enter a valid email address.');
+                valid = false;
+            }
+            if (mode === 'signup' && !elements.name.value.trim()) {
+                setError(elements.name, 'name-error', 'Enter your full name.');
+                valid = false;
+            }
+            if (elements.password.value.length < 8) {
+                setError(elements.password, 'password-error', 'Use at least 8 characters.');
+                valid = false;
+            }
+            return valid;
+        }
+
+        elements.loginTab.addEventListener('click', () => setMode('login'));
+        elements.signupTab.addEventListener('click', () => setMode('signup'));
+        elements.switchCopy.addEventListener('click', (event) => {
+            if (event.target.id === 'switch-link') {
+                event.preventDefault();
+                setMode(mode === 'login' ? 'signup' : 'login');
+            }
+        });
+
+        document.querySelector('.toggle-password').addEventListener('click', (event) => {
+            const visible = elements.password.type === 'text';
+            elements.password.type = visible ? 'password' : 'text';
+            event.currentTarget.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+            event.currentTarget.textContent = visible ? '◉' : '◎';
+        });
+
+        elements.forgot.addEventListener('click', (event) => {
+            event.preventDefault();
+            const email = elements.identity.value.trim();
+            showMessage(email ? `If an account exists for ${email}, a reset link is on its way.` : 'Enter your email above, then choose Forgot password again.', 'success');
+        });
+
+        elements.form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!validate()) return;
+
+            elements.submit.disabled = true;
+            elements.submit.textContent = mode === 'signup' ? 'Creating account…' : 'Signing in…';
+            clearMessage();
+
+            try {
+                const email = elements.identity.value.trim();
+                const password = elements.password.value;
+
+                if (mode === 'signup') {
+                    const fullName = elements.name.value.trim();
+                    // 1. Create the auth user
+                    let signUpData = null, signUpError = null;
+                    if (db) {
+                        try {
+                            const res = await db.auth.signUp({
+                                email,
+                                password,
+                                options: { data: { full_name: fullName } }
+                            });
+                            signUpData = res.data;
+                            signUpError = res.error;
+                        } catch (err) {
+                            signUpError = err;
+                        }
+                    } else {
+                        signUpError = new Error('Database offline. Please try again later.');
+                    }
+                    if (signUpError) {
+                        showMessage(signUpError.message, 'error');
+                    } else {
+                        // 2. Insert a row into the users table (optional / non-blocking)
+                        const userId = signUpData?.user?.id;
+                        if (userId && db) {
+                            try {
+                                const { error: insertError } = await db.from('users').insert([
+                                    { id: userId, email, name: fullName }
+                                ]);
+                                if (insertError) {
+                                    console.warn('Optional users table insert skipped:', insertError.message);
+                                }
+                            } catch (e) {
+                                console.warn('Optional users table insert skipped:', e);
+                            }
+                        }
+                        if (signUpData?.session) {
+                            try { localStorage.setItem('cached_user_email', email); } catch(e){}
+                            showMessage('Account created! Redirecting...', 'success');
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 800);
+                        } else {
+                            showMessage('Account created! You can now sign in.', 'success');
+                        }
+                    }
+                } else {
+                    const { data: signInData, error: signInError } = await (db ? db.auth.signInWithPassword({ email, password }) : Promise.reject(new Error("Supabase offline")));
+                    if (signInError) {
+                        showMessage(signInError.message, 'error');
+                    } else {
+                        try { localStorage.setItem('cached_user_email', email); } catch(e){}
+                        showMessage('Signed in successfully! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 800);
+                    }
+                }
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                const msg = err?.message || String(err) || 'Something went wrong. Please try again.';
+                showMessage(msg, 'error');
+            } finally {
+                // Always re-enable the button no matter what
+                elements.submit.disabled = false;
+                elements.submit.textContent = mode === 'signup' ? 'Create account' : 'Log in';
+            }
+        });
+
+        // Guard: only attach listener if the Google button exists in the DOM
+        if (elements.google) {
+            elements.google.addEventListener('click', () => showMessage('Google sign-in would start here once OAuth is connected.', 'success'));
+        }
+
+        }); // end DOMContentLoaded
+    </script>
+</body>
+
+</html>

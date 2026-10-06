@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management System - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-sub: #94a3b8;
+            --primary: #0b5d73;
+            --primary-hover: #08495a;
+            --primary-soft: #e6f3f7;
+            --progress-fill: #0d7698;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Header */
+        header.top-bar {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-brand .brand-logo {
+            height: 48px;
+            width: auto;
+            max-width: 160px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .header-brand h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .header-brand p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-email {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #f1f5f9;
+            color: #ef4444;
+        }
+
+        .logout-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content Container */
+        main.main-container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 48px 64px;
+            flex: 1;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .section-header h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .btn-new-project {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 11px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(11, 93, 115, 0.15);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-new-project:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(11, 93, 115, 0.25);
+        }
+
+        .btn-new-project svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        /* Project Card */
+        .project-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .project-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        /* Status Badges */
+        .badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+
+        .badge.in-progress {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge.planning {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge.completed {
+            background-color: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge.on-hold {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin-bottom: 24px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 44px;
+        }
+
+        /* Progress Area */
+        .card-progress-area {
+            margin-bottom: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .progress-percent {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--progress-fill);
+            border-radius: 9999px;
+            transition: width 0.6s ease;
+        }
+
+        /* Delete Project Card Button */
+        .btn-delete-card {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            padding: 4px 6px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .btn-delete-card:hover {
+            color: #ef4444;
+            background-color: #fee2e2;
+        }
+
+        /* Dates Footer */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-sub);
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+            font-weight: 500;
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 14px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transform: scale(0.96);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 93, 115, 0.12);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-footer {
+            padding: 18px 28px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Loading Overlay */
+        #auth-guard {
+            display: none !important;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header.top-bar {
+                padding: 16px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+
+            .header-brand .brand-logo {
+                height: 38px;
+            }
+
+            .header-user {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            main.main-container {
+                padding: 24px 20px 48px;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <header class="top-bar">
+        <div class="header-brand">
+            <img src="assets/itpss-logo.png" alt="ITPSS Logo" class="brand-logo" onerror="this.src='itpss-logo.png'">
+            <div class="brand-text">
+                <h1>Project Management System</h1>
+                <p>Manage your projects, tasks, and progress</p>
+            </div>
+        </div>
+        <div class="header-user">
+            <div id="notif-bell-container"></div>
+            <a href="audit-log.html" title="View Audit Log" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-main);text-decoration:none;background:#fff;transition:all 0.15s;">
+                <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span>Audit Log</span>
+            </a>
+            <span class="user-email" id="user-display-email">loading...</span>
+            <button class="logout-btn" id="logout-btn" title="Sign out" aria-label="Sign out">
+                <!-- Exit door icon -->
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="section-header">
+            <h2>Your Projects</h2>
+            <button class="btn-new-project" id="open-modal-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>New Project</span>
+            </button>
+        </div>
+
+        <!-- Grid of Project Cards -->
+        <div class="projects-grid" id="projects-container">
+            <!-- Rendered by JS -->
+        </div>
+
+    </main>
+
+    <!-- Modal for Adding New Project -->
+    <div class="modal-overlay" id="project-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Project</h3>
+                <button class="modal-close" id="close-modal-btn">&times;</button>
+            </div>
+            <form id="project-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" id="project-name" placeholder="e.g. Website Redesign" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-desc">Description</label>
+                        <textarea id="project-desc" placeholder="Brief overview of project goals..."
+                            required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="project-status">Status</label>
+                            <select id="project-status">
+                                <option value="In Progress">In Progress</option>
+                                <option value="Planning">Planning</option>
+                                <option value="Completed">Completed</option>
+                                <option value="On Hold">On Hold</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-progress">Progress (%)</label>
+                            <input type="number" id="project-progress" min="0" max="100" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="project-start">Start Date</label>
+                            <input type="text" id="project-start" placeholder="e.g. 20 Aug 2026" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-due">Due Date</label>
+                            <input type="text" id="project-due" placeholder="e.g. 01 Dec 2026" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="cancel-modal-btn">Cancel</button>
+                    <button type="submit" class="btn-submit">Add Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Supabase Config
+            const SUPABASE_URL = 'https://umdccvvyjyuepmzmqqfn.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZGNjdnZ5anl1ZXBtem1xcWZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjA5MTEsImV4cCI6MjEwNTA5NjkxMX0.oLe9xzu-JlpfKQ1oFhKnVUux5XxsgRNEz4btnzFmJqU';
+
+            let db = null;
+            try {
+                if (window.supabase && window.supabase.createClient) {
+                    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                }
+            } catch (e) { console.warn('Supabase init failed', e); }
+
+            const authGuard = document.getElementById('auth-guard');
+            const userDisplayEmail = document.getElementById('user-display-email');
+            const logoutBtn = document.getElementById('logout-btn');
+            const projectsContainer = document.getElementById('projects-container');
+
+            // Modal elements
+            const projectModal = document.getElementById('project-modal');
+            const openModalBtn = document.getElementById('open-modal-btn');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const cancelModalBtn = document.getElementById('cancel-modal-btn');
+            const projectForm = document.getElementById('project-form');
+
+            // 1. Session verification & Email display (instant, zero delay)
+            if (authGuard) authGuard.style.display = 'none';
+
+            const cachedEmail = localStorage.getItem('cached_user_email');
+            if (cachedEmail) {
+                userDisplayEmail.textContent = cachedEmail;
+            } else {
+                userDisplayEmail.textContent = '';
+            }
+
+            // Silent background session check without blocking UI
+            if (db) {
+                db.auth.getSession().then(({ data: { session }, error }) => {
+                    if (session && session.user && session.user.email) {
+                        const email = session.user.email;
+                        localStorage.setItem('cached_user_email', email);
+                        userDisplayEmail.textContent = email;
+                    }
+                }).catch(() => {});
+            }
+
+            // 2. Sign out handling
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    (db ? await db.auth.signOut() : null);
+                } catch (e) {
+                    console.error('Sign out error:', e);
+                }
+                localStorage.removeItem('active_project');
+                window.location.href = 'index.html';
+            });
+
+            // Seed project shown on first visit (only if no saved projects exist yet)
+            const defaultProjects = [
+                {
+                    id: 'default-1',
+                    title: 'Website Redesign',
+                    status: 'In Progress',
+                    badgeClass: 'in-progress',
+                    description: "Revamping the company's website to enhance user experience, improve navigation, and ensure mobile responsiveness.",
+                    progress: 45,
+                    manager: 'Jessica Harmon',
+                    startDate: '20 Aug 2026',
+                    dueDate: '01 Dec 2026'
+                }
+            ];
+
+            // 3. Project state management
+            function getProjects() {
+                const saved = localStorage.getItem('user_projects');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            return parsed;
+                        }
+                    } catch (e) { }
+                }
+                // First visit or empty list — seed with default and persist
+                saveProjects(defaultProjects);
+                return defaultProjects;
+            }
+
+            function saveProjects(projects) {
+                localStorage.setItem('user_projects', JSON.stringify(projects));
+            }
+
+            function getBadgeClass(status) {
+                switch (status.toLowerCase()) {
+                    case 'in progress': return 'in-progress';
+                    case 'planning': return 'planning';
+                    case 'completed': return 'completed';
+                    case 'on hold': return 'on-hold';
+                    default: return 'planning';
+                }
+            }
+
+            function renderProjects() {
+                const projects = getProjects();
+                projectsContainer.innerHTML = '';
+
+                projects.forEach(project => {
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    card.innerHTML = `
+                        <div>
+                            <div class="card-top">
+                                <h3 class="card-title">${escapeHtml(project.title)}</h3>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="badge ${getBadgeClass(project.status)}">${escapeHtml(project.status)}</span>
+                                    <button class="btn-delete-card" title="Delete project">
+                                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="card-desc">${escapeHtml(project.description)}</p>
+                        </div>
+                        <div>
+                            <div class="card-progress-area">
+                                <div class="progress-header">
+                                    <span class="progress-label">Progress</span>
+                                    <span class="progress-percent">${Number(project.progress)}%</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-bar-fill" style="width: ${Math.min(100, Math.max(0, Number(project.progress)))}%;"></div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <span>${escapeHtml(project.startDate)}</span>
+                                <span>${escapeHtml(project.dueDate)}</span>
+                            </div>
+                        </div>
+                    `;
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', () => {
+                        localStorage.setItem('active_project', JSON.stringify(project));
+                        window.location.href = 'project-dashboard.html';
+                    });
+
+                    const deleteBtn = card.querySelector('.btn-delete-card');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm(`Are you sure you want to delete "${project.title}"?`)) {
+                                let all = getProjects();
+                                all = all.filter(p => p.id !== project.id);
+                                saveProjects(all);
+                                renderProjects();
+                            }
+                        });
+                    }
+
+                    projectsContainer.appendChild(card);
+                });
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/[&<>'"]/g, tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag));
+            }
+
+            // Initial render
+            renderProjects();
+
+            // 4. Modal event listeners
+            openModalBtn.addEventListener('click', () => {
+                projectModal.classList.add('active');
+                document.getElementById('project-name').focus();
+            });
+
+            const closeModal = () => {
+                projectModal.classList.remove('active');
+                projectForm.reset();
+            };
+
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelModalBtn.addEventListener('click', closeModal);
+
+            projectModal.addEventListener('click', (e) => {
+                if (e.target === projectModal) closeModal();
+            });
+
+            // Handle Add Project submit
+            projectForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('project-name').value.trim();
+                const desc = document.getElementById('project-desc').value.trim();
+                const status = document.getElementById('project-status').value;
+                const progress = parseInt(document.getElementById('project-progress').value, 10) || 0;
+                const start = document.getElementById('project-start').value.trim();
+                const due = document.getElementById('project-due').value.trim();
+
+                const projects = getProjects();
+                const newProject = {
+                    id: Date.now(),
+                    title: name,
+                    status: status,
+                    description: desc,
+                    progress: progress,
+                    startDate: start,
+                    dueDate: due
+                };
+
+                projects.unshift(newProject);
+                saveProjects(projects);
+                renderProjects();
+                closeModal();
+            });
+
+        });
+    </script>
+    <script src="utils/notifications.js"></script>
+</body>
+</html>

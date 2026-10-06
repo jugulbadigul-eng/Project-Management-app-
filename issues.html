@@ -1,0 +1,1398 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues - Project Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #0c2d48;
+            --sidebar-hover: #145da0;
+            --sidebar-active: #0e86d4;
+            --sidebar-text: #b1d4e0;
+            --sidebar-text-active: #ffffff;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0b5d73;
+            --primary-hover: #084758;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Sidebar ── */
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: 100vh;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 50;
+            transition: margin-left 0.25s ease, transform 0.25s ease;
+        }
+
+        aside.sidebar.closed {
+            margin-left: -260px;
+        }
+
+        .sidebar-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .sidebar-header-row .back-projects-link {
+            margin-bottom: 0;
+        }
+
+
+        /* Sits directly on the edge/border of the sidebar */
+        .sidebar-edge-toggle {
+            position: fixed;
+            top: 22px;
+            left: 246px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--sidebar-bg);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: var(--sidebar-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 60;
+            transition: left 0.25s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar-edge-toggle:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .sidebar-edge-toggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-edge-toggle.closed {
+            left: 12px;
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        .sidebar-edge-toggle.closed svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        .sidebar-top {
+            padding: 24px 20px;
+        }
+
+        .back-projects-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            transition: color 0.15s ease;
+        }
+
+        .back-projects-link:hover {
+            color: #cbd5e1;
+        }
+
+        .sidebar-brand {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 28px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+        }
+
+        .nav-item a svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .nav-item a:hover {
+            color: #fff;
+            background-color: var(--sidebar-hover);
+        }
+
+        .nav-item.active a {
+            color: var(--sidebar-text-active);
+            background-color: var(--sidebar-active);
+            font-weight: 600;
+        }
+
+        .sidebar-bottom {
+            padding: 18px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #334155;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .user-name {
+            color: #f1f5f9;
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-sidebar-logout {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-sidebar-logout:hover {
+            color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-sidebar-logout svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ── Main Content ── */
+        main.main-content {
+            flex: 1;
+            padding: 36px 48px 60px;
+            max-width: 100%;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .btn-add-task {
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 11px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-add-task:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* ── Search Bar ── */
+        .search-wrap {
+            margin-bottom: 20px;
+        }
+
+        .search-inner {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            width: 280px;
+        }
+
+        .search-inner svg {
+            position: absolute;
+            left: 12px;
+            width: 16px;
+            height: 16px;
+            color: #94a3b8;
+        }
+
+        .search-inner input {
+            width: 100%;
+            padding: 9px 14px 9px 36px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-family: inherit;
+            color: var(--text-main);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .search-inner input::placeholder {
+            color: #94a3b8;
+        }
+
+        .search-inner input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 93, 115, 0.1);
+        }
+
+        /* ── Task Table Card ── */
+        .table-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .task-table thead tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .task-table th {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 13px 18px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            background: #fff;
+        }
+
+        .task-table td {
+            padding: 16px 18px;
+            font-size: 13.5px;
+            color: var(--text-main);
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .task-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .task-table tbody tr {
+            transition: background-color 0.12s ease;
+        }
+
+        .task-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .task-name {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Priority badges */
+        .badge-priority {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 11px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-priority.high {
+            background: #fff3e4;
+            color: #ea6f1a;
+        }
+
+        .badge-priority.critical {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-priority.medium {
+            background: #fef9c3;
+            color: #ca8a04;
+        }
+
+        .badge-priority.low {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        /* Status badges */
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 11px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-status.open {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-status.resolved {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        /* Action icon buttons */
+        .action-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s ease;
+            color: #94a3b8;
+        }
+
+        .btn-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-icon.edit:hover {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-icon.delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.35;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* ── Add/Edit Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #fff;
+            width: 100%;
+            max-width: 560px;
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .btn-close-modal {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+        }
+
+        .btn-close-modal:hover {
+            color: var(--text-main);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            background: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 93, 115, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .progress-display {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            text-align: right;
+        }
+
+        .progress-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 9999px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .progress-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid var(--primary);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .progress-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        #completion-label {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        #completion-label strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            line-height: 1.55;
+        }
+
+        .btn-save-task {
+            width: 100%;
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: inherit;
+            letter-spacing: 0.01em;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-save-task:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            aside.sidebar {
+                width: 100%;
+                height: auto;
+                min-height: unset;
+                position: relative;
+            }
+
+            main.main-content {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .search-inner {
+                width: 100%;
+            }
+        }
+
+
+        .btn-upload {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .btn-upload:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+            color: #0f172a;
+        }
+
+        .attachment-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #0b5d73;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid #e2e8f0;
+        }
+
+        .attachment-pill:hover {
+            background-color: #e2e8f0;
+            border-color: #cbd5e1;
+
+        }
+
+        .attachment-preview {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #0b5d73;
+        }
+
+        .btn-remove-attachment {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <a href="dashboard.html" class="back-projects-link">&larr; ALL PROJECTS</a>
+            <div class="sidebar-brand" id="sidebar-project-title">Project Manager</div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="project-dashboard.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="project-details.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        Tasks
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timeline.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Timeline
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="add-diary-entry.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Diary Log
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="team-members.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        Team Members
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="milestones.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                        </svg>
+                        Milestones
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="issues.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Issues
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="weekly-reports.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Weekly Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Project-report.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Project Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="audit-log.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        Audit Log
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar" id="avatar-circle">AH</div>
+                <div class="user-name" id="user-name-display">Hilman A</div>
+                <button class="btn-sidebar-logout" onclick="handleLogout()" title="Sign out">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <button class="sidebar-edge-toggle" id="sidebarEdgeToggle" onclick="toggleSidebar()" title="Toggle Sidebar"
+        type="button" aria-label="Toggle Sidebar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Issues / Problems</h1>
+            <button class="btn-add-task" onclick="openModal()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Report Issue
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-toolbar"
+            style="display: flex; gap: 12px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; background: #fff; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card);">
+            <div style="flex: 1; min-width: 200px; position: relative;">
+                <svg style="position: absolute; left: 12px; top: 10px; width: 16px; height: 16px; color: var(--text-muted);"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="search-input" placeholder="Search issues..."
+                    style="width: 100%; padding: 10px 14px 10px 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);"
+                    oninput="filterTasks()">
+            </div>
+            <input type="date" id="startDate"
+                style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);"
+                onchange="filterTasks()">
+            <input type="date" id="endDate"
+                style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);"
+                onchange="filterTasks()">
+            <select id="statusFilter"
+                style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; outline: none; color: var(--text-main);"
+                onchange="filterTasks()">
+                <option value="">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+            <button type="button" onclick="resetFilters()"
+                style="padding: 10px 14px; background-color: #f1f5f9; color: var(--text-main); border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-family: inherit;">Reset</button>
+        </div>
+
+        <!-- Task Table -->
+        <div class="table-card">
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>Issue</th>
+                        <th>Date</th>
+                        <th>Assigned To</th>
+                        <th style="color: var(--primary);">Priority</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="task-table-body">
+                    <!-- Rows injected by JS -->
+                </tbody>
+            </table>
+            <div class="empty-state" id="empty-state" style="display:none;">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p>No issues found. Click <strong>+ Report Issue</strong> to create one.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── Add / Edit Modal ── -->
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal-card">
+            <div class="modal-top">
+                <h2 class="modal-title" id="modal-title">Report Issue</h2>
+                <button class="btn-close-modal" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form id="task-form" onsubmit="saveTask(event)">
+                <input type="hidden" id="task-id">
+
+                <!-- Issue Title -->
+                <div class="form-group">
+                    <label for="task-name">Issue Title *</label>
+                    <input type="text" id="task-name" placeholder="e.g. Login Page Error" required>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="task-desc">Description</label>
+                    <textarea id="task-desc" rows="3" placeholder="Describe the issue in detail..."></textarea>
+                </div>
+
+                <!-- Date Reported & Assigned To -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-date">Date Reported</label>
+                        <input type="date" id="task-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-assigned">Assigned To</label>
+                        <input type="text" id="task-assigned" placeholder="e.g. John Doe">
+                    </div>
+                </div>
+
+                <!-- Priority & Status -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical" selected>Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-status">Status</label>
+                        <select id="task-status">
+                            <option value="Open" selected>Open</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Solution -->
+                <div class="form-group">
+                    <label for="task-solution">Solution</label>
+                    <textarea id="task-solution" rows="2"
+                        placeholder="What was done to resolve this issue..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Attachments</label>
+                    <input type="file" id="file-upload" style="display: none;" onchange="handleFileSelected(event)">
+                    <button type="button" class="btn-upload" onclick="document.getElementById('file-upload').click()">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            style="margin-right: 4px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Upload File / Image
+                    </button>
+                    <span id="file-name-display" style="font-size: 13px; color: #64748b;"></span>
+                </div>
+
+
+                <button type="submit" class="btn-save-task" id="btn-submit-task">Report Issue</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ── Supabase Config ─────────────────────────────────────────
+        const SUPABASE_URL = 'https://umdccvvyjyuepmzmqqfn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZGNjdnZ5anl1ZXBtem1xcWZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjA5MTEsImV4cCI6MjEwNTA5NjkxMX0.oLe9xzu-JlpfKQ1oFhKnVUux5XxsgRNEz4btnzFmJqU';
+        let db = null;
+        try {
+            if (window.supabase && window.supabase.createClient) {
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) { console.warn('Supabase init failed', e); }
+
+        let tasks = [];
+        const ISSUES_STORAGE_KEY = 'cached_issues_data';
+
+        function loadLocalIssues() {
+            try {
+                const raw = localStorage.getItem(ISSUES_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveLocalIssues(list) {
+            try {
+                localStorage.setItem(ISSUES_STORAGE_KEY, JSON.stringify(list));
+            } catch (e) { }
+        }
+
+        // ── Render ───────────────────────────────────────────────────
+        function priorityBadge(p) {
+            const map = { High: 'high', Critical: 'critical', Medium: 'medium', Low: 'low' };
+            return `<span class="badge-priority ${map[p] || 'low'}">${p}</span>`;
+        }
+
+        function statusBadge(s) {
+            const map = { Open: 'open', Resolved: 'resolved' };
+            return `<span class="badge-status ${map[s] || 'open'}">${s}</span>`;
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '\u2014';
+            const d = new Date(iso + 'T00:00:00');
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function renderTasks(list) {
+            const tbody = document.getElementById('task-table-body');
+            const empty = document.getElementById('empty-state');
+
+            if (!list || list.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            tbody.innerHTML = list.map(t => `
+                <tr>
+                    <td><span class="task-name">${t.name}</span></td>
+                    <td>${formatDate(t.date)}</td>
+                    <td>${t.assigned || '\u2014'}</td>
+                    <td>${priorityBadge(t.priority)}</td>
+                    <td>${statusBadge(t.status)}</td>
+                    <td>
+                        <div class="action-cell">
+                            <button class="btn-icon edit" onclick="editTask('${t.id}')" title="Edit">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button class="btn-icon delete" onclick="deleteTask('${t.id}')" title="Delete">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ── Filter / Search ──────────────────────────────────────────
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('statusFilter').value = '';
+            filterTasks();
+        }
+
+        function filterTasks() {
+            const q = document.getElementById('search-input').value.toLowerCase();
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            const status = document.getElementById('statusFilter').value;
+
+            let filtered = tasks;
+
+            if (q) {
+                filtered = filtered.filter(t =>
+                    (t.name || '').toLowerCase().includes(q) ||
+                    (t.assigned || '').toLowerCase().includes(q)
+                );
+            }
+            if (status) {
+                filtered = filtered.filter(t => t.status === status);
+            }
+            if (start) {
+                filtered = filtered.filter(t => t.date >= start);
+            }
+            if (end) {
+                filtered = filtered.filter(t => t.date <= end);
+            }
+
+            renderTasks(filtered);
+        }
+
+        // ── Modal Helpers ────────────────────────────────────────────
+        function openModal(task) {
+            const modal = document.getElementById('task-modal');
+            const form = document.getElementById('task-form');
+            form.reset();
+            window._pendingIssueAttachment = null;
+            document.getElementById('file-name-display').textContent = '';
+
+            if (task) {
+                document.getElementById('modal-title').textContent = 'Edit Issue';
+                document.getElementById('btn-submit-task').textContent = 'Update Issue';
+                document.getElementById('task-id').value = task.id;
+                document.getElementById('task-name').value = task.name;
+                document.getElementById('task-desc').value = task.desc || '';
+                document.getElementById('task-assigned').value = task.assigned || '';
+                document.getElementById('task-date').value = task.date || '';
+                document.getElementById('task-priority').value = task.priority;
+                document.getElementById('task-status').value = task.status;
+                document.getElementById('task-solution').value = task.solution || '';
+            } else {
+                document.getElementById('modal-title').textContent = 'Report Issue';
+                document.getElementById('btn-submit-task').textContent = 'Report Issue';
+                document.getElementById('task-id').value = '';
+                document.getElementById('task-date').value = new Date().toISOString().split('T')[0];
+            }
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('task-modal').classList.remove('open');
+        }
+
+        document.getElementById('task-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        // ── CRUD ─────────────────────────────────────────────────────
+        async function saveTask(e) {
+            e.preventDefault();
+            const id = document.getElementById('task-id').value;
+            const name = document.getElementById('task-name').value.trim();
+            const desc = document.getElementById('task-desc').value.trim();
+            const assigned = document.getElementById('task-assigned').value.trim();
+            const date = document.getElementById('task-date').value || null;
+            const priority = document.getElementById('task-priority').value;
+            const status = document.getElementById('task-status').value;
+            const solution = document.getElementById('task-solution').value.trim();
+
+            if (!name) return;
+
+            const attachment = window._pendingIssueAttachment || null;
+            const issueData = { name, desc, assigned, date, priority, status, solution, attachment };
+
+            const btn = document.getElementById('btn-submit-task');
+            btn.disabled = true;
+
+            try {
+                if (id) {
+                    if (db) {
+                        try {
+                            await db.from('issues').update(issueData).eq('id', id);
+                        } catch (e) { console.warn('Supabase update notice:', e); }
+                    }
+                    tasks = tasks.map(t => t.id == id ? { ...t, ...issueData } : t);
+                } else {
+                    let saved = false;
+                    if (db) {
+                        try {
+                            const { data, error } = await db.from('issues').insert([issueData]).select().single();
+                            if (!error && data) {
+                                tasks.unshift(data);
+                                saved = true;
+                            }
+                        } catch (e) { console.warn('Supabase insert notice:', e); }
+                    }
+                    if (!saved) {
+                        tasks.unshift({ id: Date.now().toString(), ...issueData });
+                    }
+                }
+                saveLocalIssues(tasks);
+                renderTasks(tasks);
+                if (window.AuditLog) {
+                    AuditLog.log(id ? 'Updated' : 'Created', 'Issue', name);
+                }
+                window._pendingIssueAttachment = null;
+                document.getElementById('file-upload').value = '';
+                document.getElementById('file-name-display').textContent = '';
+                closeModal();
+            } catch (err) {
+                console.error('Save issue error:', err);
+                alert('Error saving issue: ' + (err.message || err));
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id == id);
+            if (task) openModal(task);
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('Delete this issue? This cannot be undone.')) return;
+            const issueBeingDeleted = tasks.find(t => t.id == id);
+            if (window.AuditLog && issueBeingDeleted) {
+                AuditLog.log('Deleted', 'Issue', issueBeingDeleted.name);
+            }
+            if (db) {
+                try {
+                    await db.from('issues').delete().eq('id', id);
+                } catch (err) {
+                    console.warn('Delete issue remote notice:', err);
+                }
+            }
+            tasks = tasks.filter(t => t.id != id);
+            saveLocalIssues(tasks);
+            renderTasks(tasks);
+        }
+
+        // ── File Attachment ──────────────────────────────────────────
+        function handleFileSelected(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const display = document.getElementById('file-name-display');
+            display.textContent = '\u23F3 Reading file...';
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                window._pendingIssueAttachment = {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    data: ev.target.result
+                };
+                display.textContent = '\uD83D\uDCCE ' + file.name;
+            };
+            reader.onerror = function () {
+                display.textContent = '\u274C Failed to read file';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ── Auth / Logout ────────────────────────────────────────────
+        function handleLogout() {
+            if (confirm('Are you sure you want to sign out?')) {
+                localStorage.removeItem('active_project');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ── Init ─────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', async function () {
+            // Sync project title in sidebar from localStorage
+            (function() {
+                try {
+                    const ap = localStorage.getItem('active_project');
+                    if (ap) {
+                        const proj = JSON.parse(ap);
+                        const brandEl = document.getElementById('sidebar-project-title');
+                        if (brandEl && proj.title) brandEl.textContent = proj.title;
+                    }
+                } catch(e) {}
+            })();
+            let loaded = false;
+            if (db) {
+                try {
+                    const { data, error } = await db.from('issues').select('*').order('id', { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        tasks = data;
+                        loaded = true;
+                    }
+                } catch (err) {
+                    console.warn('Load issues notice:', err);
+                }
+            }
+            if (!loaded) {
+                tasks = loadLocalIssues();
+            }
+            renderTasks(tasks);
+
+            if (db) {
+                try {
+                    const { data: { session } } = await db.auth.getSession();
+                    if (session && session.user) {
+                        const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Hilman A';
+                        document.getElementById('user-name-display').textContent = name;
+                        document.getElementById('avatar-circle').textContent = name.charAt(0).toUpperCase();
+                    }
+                } catch (err) { console.warn('Auth skip', err); }
+            }
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const isClosed = sidebar.classList.toggle('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.toggle('closed', isClosed);
+                edgeBtn.setAttribute('title', isClosed ? 'Open Sidebar' : 'Collapse Sidebar');
+            }
+            if (backdrop) {
+                backdrop.classList.toggle('active', !isClosed && window.innerWidth <= 768);
+            }
+            localStorage.setItem('sidebar_closed', isClosed);
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.add('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.add('closed');
+                edgeBtn.setAttribute('title', 'Open Sidebar');
+            }
+            if (backdrop) backdrop.classList.remove('active');
+            localStorage.setItem('sidebar_closed', 'true');
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.remove('closed');
+                edgeBtn.setAttribute('title', 'Collapse Sidebar');
+            }
+            if (backdrop && window.innerWidth <= 768) backdrop.classList.add('active');
+            localStorage.setItem('sidebar_closed', 'false');
+        }
+
+        // Initialize sidebar state on page load
+        (function initSidebar() {
+            const isClosed = localStorage.getItem('sidebar_closed') === 'true';
+            if (isClosed && window.innerWidth > 768) {
+                closeSidebar();
+            }
+        })();
+    </script>
+    <script src="utils/notifications.js"></script>
+    <script src="utils/audit-log.js"></script>
+</body>
+
+</html>

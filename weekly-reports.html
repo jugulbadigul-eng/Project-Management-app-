@@ -1,0 +1,1004 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Progress Reports - Project Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #0c2d48;
+            --sidebar-hover: #145da0;
+            --sidebar-active: #0e86d4;
+            --sidebar-text: #b1d4e0;
+            --sidebar-text-active: #ffffff;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0b5d73;
+            --primary-hover: #084758;
+            --radius-lg: 14px;
+            --radius-md: 8px;
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar Styling */
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            min-height: 100vh;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: margin-left 0.25s ease, transform 0.25s ease;
+        }
+
+        aside.sidebar.closed {
+            margin-left: -260px;
+        }
+
+        .sidebar-edge-toggle {
+            position: fixed;
+            top: 22px;
+            left: 246px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--sidebar-bg);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+            color: var(--sidebar-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 60;
+            transition: left 0.25s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        }
+
+        .sidebar-edge-toggle:hover {
+            background-color: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .sidebar-edge-toggle svg {
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-edge-toggle.closed {
+            left: 12px;
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        .sidebar-edge-toggle.closed svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 45;
+        }
+
+        .sidebar-top {
+            padding: 24px 20px;
+        }
+
+        .back-projects-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            transition: color 0.15s ease;
+        }
+
+        .back-projects-link:hover {
+            color: #cbd5e1;
+        }
+
+        .sidebar-brand {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 28px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: all 0.15s ease;
+        }
+
+        .nav-item a svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .nav-item a:hover {
+            color: #ffffff;
+            background-color: var(--sidebar-hover);
+        }
+
+        .nav-item.active a {
+            color: var(--sidebar-text-active);
+            background-color: var(--sidebar-active);
+            font-weight: 600;
+        }
+
+        .sidebar-bottom {
+            padding: 18px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #334155;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .user-name {
+            color: #f1f5f9;
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-sidebar-logout {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-sidebar-logout:hover {
+            color: #ef4444;
+        }
+
+        /* Main Content */
+        main.main-content {
+            flex: 1;
+            padding: 36px 48px 60px;
+            max-width: 1040px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .btn-submit-report {
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 11px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit-report:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Report Cards List */
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .report-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .week-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .week-dates {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .card-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .progress-info {
+            text-align: right;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .progress-val {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .action-icons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: transform 0.15s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .icon-btn.edit { color: #475569; }
+        .icon-btn.delete { color: #dc2626; }
+
+        /* Progress Bar Divider */
+        .card-progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--primary);
+            border-radius: 9999px;
+            margin: 10px 0 24px;
+        }
+
+        /* 2x2 Grid Content */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px 32px;
+        }
+
+        .grid-item h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .grid-item.completed h4 { color: #16a34a; }
+        .grid-item.working h4 { color: #2563eb; }
+        .grid-item.problems h4 { color: #dc2626; }
+        .grid-item.next h4 { color: #0284c7; }
+
+        .grid-item p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Modal Form (Edit / Submit Report) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 650px;
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .btn-close-modal {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(11, 93, 115, 0.12);
+        }
+
+        .form-group textarea {
+            min-height: 75px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .progress-slider {
+            width: 100%;
+            height: 7px;
+            border-radius: 9999px;
+            background: #e2e8f0;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-save-report {
+            width: 100%;
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+
+        .btn-save-report:hover {
+            background-color: var(--primary-hover);
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            aside.sidebar { width: 100%; height: auto; min-height: unset; position: relative; }
+            main.main-content { padding: 24px 20px; }
+            .card-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <a href="dashboard.html" class="back-projects-link">&larr; ALL PROJECTS</a>
+            <div class="sidebar-brand" id="sidebar-project-title">Project Manager</div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="project-dashboard.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="project-details.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Project Details
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="tasks.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        Tasks
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="timeline.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Timeline
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="add-diary-entry.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        Diary Log
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="team-members.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        Team Members
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="milestones.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
+                        Milestones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="issues.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Issues
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="weekly-reports.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Weekly Reports
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Project-report.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Project Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="audit-log.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        Audit Log
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="avatar">AH</div>
+                <div class="user-name">Hilman A</div>
+                <button class="btn-sidebar-logout" onclick="window.location.href='index.html'" title="Sign out">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+    <button class="sidebar-edge-toggle" id="sidebarEdgeToggle" onclick="toggleSidebar()" title="Toggle Sidebar"
+        type="button" aria-label="Toggle Sidebar">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="15" height="15">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Weekly Progress Reports</h1>
+            <button class="btn-submit-report" onclick="openReportModal()">
+                <span>+</span> Submit Report
+            </button>
+        </div>
+
+        <div class="reports-list" id="reports-container">
+            <!-- Dynamic Report Cards will render here -->
+        </div>
+    </main>
+
+    <!-- Submit / Edit Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-card">
+            <div class="modal-top">
+                <h2 class="modal-title" id="modal-title">Edit Weekly Report</h2>
+                <button class="btn-close-modal" onclick="closeReportModal()">&times;</button>
+            </div>
+
+            <form id="report-form" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="report-id">
+
+                <div class="form-group">
+                    <label for="week-label">Week Label *</label>
+                    <input type="text" id="week-label" placeholder="e.g. Week 3" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="week-start">Week Start</label>
+                        <input type="date" id="week-start">
+                    </div>
+                    <div class="form-group">
+                        <label for="week-end">Week End</label>
+                        <input type="date" id="week-end">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="progress-label-text">Overall Progress: 30%</label>
+                    <input type="range" id="week-progress" class="progress-slider" min="0" max="100" value="30" oninput="updateProgressSlider(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="work-completed">Completed Work</label>
+                    <textarea id="work-completed" placeholder="List what was completed this week..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="work-current">Currently Working On</label>
+                    <textarea id="work-current" placeholder="What is being worked on now..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="work-problems">Problems Encountered</label>
+                    <textarea id="work-problems" placeholder="Any issues or blockers..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="work-next">Next Week Plan</label>
+                    <textarea id="work-next" placeholder="Plan for next week..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-save-report" id="modal-submit-btn">Update Report</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://umdccvvyjyuepmzmqqfn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZGNjdnZ5anl1ZXBtem1xcWZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1MjA5MTEsImV4cCI6MjEwNTA5NjkxMX0.oLe9xzu-JlpfKQ1oFhKnVUux5XxsgRNEz4btnzFmJqU';
+        let db = null;
+        try {
+            if (window.supabase && window.supabase.createClient) {
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch(e) { console.warn('Supabase init failed', e); }
+
+        let allReports = [];
+        const REPORTS_STORAGE_KEY = 'cached_weekly_reports_data';
+
+        function loadLocalReports() {
+            try {
+                const raw = localStorage.getItem(REPORTS_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch(e) { return null; }
+        }
+
+        function saveLocalReports(list) {
+            try {
+                localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(list));
+            } catch(e) {}
+        }
+
+        const defaultReports = [
+            {
+                id: '1',
+                week_label: 'Week 3',
+                start_date: '12 Sep 2026',
+                end_date: '18 Sep 2026',
+                progress: 30,
+                completed: 'Completed the user authentication module and conducted basic tests. Initial feedback from QA has been positive.',
+                working: 'Currently integrating the user profile management system, ensuring that user data is secure and handles edge cases effectively.',
+                problems: 'Resources are limited due to overlapping projects, causing some delays. Collaboration with other teams is required to alleviate this issue.',
+                next: 'Aim to finalize the user profile management system and start working towards the first full product demo.'
+            }
+        ];
+
+        function getField(report, snake, camel) {
+            return report[snake] !== undefined ? report[snake] : (report[camel] !== undefined ? report[camel] : '');
+        }
+
+        function renderReports() {
+            const container = document.getElementById('reports-container');
+            container.innerHTML = '';
+
+            if (allReports.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 48px 20px;">No weekly reports found. Click "+ Add Report" to submit one.</div>';
+                return;
+            }
+
+            allReports.forEach(report => {
+                const weekLabel = getField(report, 'week_label', 'weekLabel') || 'Weekly Report';
+                const startDate = getField(report, 'start_date', 'startDate');
+                const endDate = getField(report, 'end_date', 'endDate');
+                const progress = report.progress || 0;
+
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div>
+                            <div class="week-title">${escapeHtml(weekLabel)}</div>
+                            <div class="week-dates">${escapeHtml(startDate)} – ${escapeHtml(endDate)}</div>
+                        </div>
+                        <div class="card-header-right">
+                            <div class="progress-info">
+                                <div class="progress-label">Progress</div>
+                                <div class="progress-val">${progress}%</div>
+                            </div>
+                            <div class="action-icons">
+                                <button class="icon-btn edit" onclick="editReport('${report.id}')" title="Edit">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                </button>
+                                <button class="icon-btn delete" onclick="deleteReport('${report.id}')" title="Delete">
+                                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-progress-bar"></div>
+
+                    <div class="card-grid">
+                        <div class="grid-item completed">
+                            <h4>&#10003; Completed</h4>
+                            <p>${escapeHtml(report.completed || 'None')}</p>
+                        </div>
+                        <div class="grid-item working">
+                            <h4>&rarr; Currently Working On</h4>
+                            <p>${escapeHtml(report.working || 'None')}</p>
+                        </div>
+                        <div class="grid-item problems">
+                            <h4>&#9888; Problems</h4>
+                            <p>${escapeHtml(report.problems || 'None')}</p>
+                        </div>
+                        <div class="grid-item next">
+                            <h4>&#128203; Next Week</h4>
+                            <p>${escapeHtml(report.next || 'None')}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
+        }
+
+        function openReportModal() {
+            document.getElementById('modal-title').textContent = 'Submit Weekly Report';
+            document.getElementById('modal-submit-btn').textContent = 'Save Report';
+            document.getElementById('report-form').reset();
+            document.getElementById('report-id').value = '';
+            updateProgressSlider(30);
+            document.getElementById('report-modal').classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('report-modal').classList.remove('active');
+        }
+
+        function updateProgressSlider(val) {
+            document.getElementById('progress-label-text').textContent = `Overall Progress: ${val}%`;
+            const slider = document.getElementById('week-progress');
+            slider.value = val;
+            slider.style.background = `linear-gradient(to right, #0b5d73 0%, #0b5d73 ${val}%, #e2e8f0 ${val}%, #e2e8f0 100%)`;
+        }
+
+        function editReport(id) {
+            const report = allReports.find(r => String(r.id) === String(id));
+            if (!report) return;
+
+            document.getElementById('modal-title').textContent = 'Edit Weekly Report';
+            document.getElementById('modal-submit-btn').textContent = 'Update Report';
+            document.getElementById('report-id').value = report.id;
+            document.getElementById('week-label').value = getField(report, 'week_label', 'weekLabel');
+            document.getElementById('work-completed').value = report.completed || '';
+            document.getElementById('work-current').value = report.working || '';
+            document.getElementById('work-problems').value = report.problems || '';
+            document.getElementById('work-next').value = report.next || '';
+            updateProgressSlider(report.progress || 30);
+
+            document.getElementById('report-modal').classList.add('active');
+        }
+
+        async function deleteReport(id) {
+            if (!confirm('Are you sure you want to delete this weekly report?')) return;
+            if (db) {
+                try {
+                    await db.from('weekly_reports').delete().eq('id', id);
+                } catch (err) {
+                    console.warn('Delete weekly report remote notice:', err);
+                }
+            }
+            allReports = allReports.filter(r => String(r.id) !== String(id));
+            saveLocalReports(allReports);
+            renderReports();
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('report-id').value;
+            const startVal = document.getElementById('week-start').value;
+            const endVal = document.getElementById('week-end').value;
+
+            const reportData = {
+                week_label: document.getElementById('week-label').value.trim(),
+                start_date: startVal || '12 Sep 2026',
+                end_date: endVal || '18 Sep 2026',
+                progress: parseInt(document.getElementById('week-progress').value, 10) || 0,
+                completed: document.getElementById('work-completed').value.trim(),
+                working: document.getElementById('work-current').value.trim(),
+                problems: document.getElementById('work-problems').value.trim(),
+                next: document.getElementById('work-next').value.trim()
+            };
+
+            const btn = document.getElementById('modal-submit-btn');
+            btn.disabled = true;
+
+            try {
+                if (id) {
+                    if (db) {
+                        try {
+                            await db.from('weekly_reports').update(reportData).eq('id', id);
+                        } catch (e) { console.warn('Supabase update notice:', e); }
+                    }
+                    const idx = allReports.findIndex(r => String(r.id) === String(id));
+                    if (idx !== -1) allReports[idx] = { ...allReports[idx], ...reportData };
+                } else {
+                    let saved = false;
+                    if (db) {
+                        try {
+                            const { data, error } = await db.from('weekly_reports').insert([reportData]).select().single();
+                            if (!error && data) {
+                                allReports.unshift(data);
+                                saved = true;
+                            }
+                        } catch (e) { console.warn('Supabase insert notice:', e); }
+                    }
+                    if (!saved) {
+                        allReports.unshift({ id: Date.now().toString(), ...reportData });
+                    }
+                }
+                saveLocalReports(allReports);
+                closeReportModal();
+                renderReports();
+            } catch (err) {
+                console.error('Save report error:', err);
+                alert('Error saving report: ' + (err.message || err));
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Sync project title in sidebar from localStorage
+            (function() {
+                try {
+                    const ap = localStorage.getItem('active_project');
+                    if (ap) {
+                        const proj = JSON.parse(ap);
+                        const brandEl = document.getElementById('sidebar-project-title');
+                        if (brandEl && proj.title) brandEl.textContent = proj.title;
+                    }
+                } catch(e) {}
+            })();
+            let loaded = false;
+            if (db) {
+                try {
+                    const { data, error } = await db.from('weekly_reports').select('*').order('id', { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        allReports = data;
+                        loaded = true;
+                    }
+                } catch (err) {
+                    console.warn('Load weekly reports notice:', err);
+                }
+            }
+            if (!loaded) {
+                const cached = loadLocalReports();
+                allReports = cached && cached.length > 0 ? cached : [...defaultReports];
+            }
+            renderReports();
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const isClosed = sidebar.classList.toggle('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.toggle('closed', isClosed);
+                edgeBtn.setAttribute('title', isClosed ? 'Open Sidebar' : 'Collapse Sidebar');
+            }
+            if (backdrop) {
+                backdrop.classList.toggle('active', !isClosed && window.innerWidth <= 768);
+            }
+            localStorage.setItem('sidebar_closed', isClosed);
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.add('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.add('closed');
+                edgeBtn.setAttribute('title', 'Open Sidebar');
+            }
+            if (backdrop) backdrop.classList.remove('active');
+            localStorage.setItem('sidebar_closed', 'true');
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const edgeBtn = document.getElementById('sidebarEdgeToggle');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.remove('closed');
+            if (edgeBtn) {
+                edgeBtn.classList.remove('closed');
+                edgeBtn.setAttribute('title', 'Collapse Sidebar');
+            }
+            if (backdrop && window.innerWidth <= 768) backdrop.classList.add('active');
+            localStorage.setItem('sidebar_closed', 'false');
+        }
+
+        (function initSidebar() {
+            const isClosed = localStorage.getItem('sidebar_closed') === 'true';
+            if (isClosed && window.innerWidth > 768) {
+                closeSidebar();
+            }
+        })();
+    </script>
+</body>
+
+</html>
