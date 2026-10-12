@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Hub | sign in</title>
+    <meta name="google-site-verification" content="6OrqGpP1XbxtWF9O3haDYgL_DthHbu9Lt-WsdacmICk">
+    <!-- Supabase JS SDK & Central Auth Guard (loaded in head for immediate protection) -->
+    <script src="supabase.js"></script>
+    <script src="/api/public-config"></script>
+    <script src="config.js"></script>
+    <script src="auth-guard.js"></script>
+    <style>
+        :root {
+            -ink: #14212b;
+            --muted: #6b7b86;
+            --line: #d9e2e7;
+            --surface: #ffffff;
+            --canvas: #f4f8fa;
+            --brand: #117aa3;
+            --brand-dark: #0d6387;
+            --brand-soft: #e7f4f8;
+            --error: #b42318;
+            --success: #16794b;
+            --shadow: 0 24px 70px rgba(25, 52, 67, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 20% 10%, rgba(17, 122, 163, 0.09), transparent 30%),
+                linear-gradient(135deg, #f8fbfc 0%, var(--canvas) 58%, #eef5f7 100%);
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+
+        .auth shell {
+            width: min(100%, 430px);
+            animation: rise-in 500ms ease both;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            color: var(--brand-dark);
+            font: 700 15px/1.2Arial, sans-serif;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .brand-mark {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            color: white;
+            background: var(--brand);
+            border-radius: 8px;
+            box-shadow: 0 7px 16px rgba(17, 122, 163, 0.2);
+            font-size: 16px;
+        }
+
+        .card {
+            position: relative;
+            padding: 36px 32px 30px;
+            background: var(--surface);
+            border: 1px solid rgba(167, 187, 197, 0.7);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .card h1 {
+            margin: 4px 0 28px;
+            text-align: center;
+            font-size: clamp(28px, 7vw, 34px);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin: 0 0 18px;
+            border-bottom: 1px solid var(--line);
+            padding: 0;
+            background: #f8fafb;
+            border-radius: 9px;
+            font: 600 13px Arial, sans-serif;
+        }
+
+        .tab {
+            padding: 10px 0;
+            color: var(--muted);
+            background: transparent;
+            border: 0;
+            border-radius: 6px;
+            cursor: pointer;
+            font: inherit;
+
+        }
+
+
+        .tab[aria-selected="true"] {
+            color: var(--ink);
+            background: white;
+            box-shadow: 0 2px 7px rgba(35, 63, 73, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+
+        /* Form label styling */
+        label {
+            display: block;
+            margin-bottom: var(--spacing-xxs);
+            /* 7px */
+            color: var(--ink);
+            font-weight: 500;
+            font-size: 13px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Wrapper for input for positioning */
+        .input-wrap {
+            position: relative;
+        }
+
+        /* Input field styling */
+        input {
+            width: 100%;
+            height: 44px;
+            padding: 0 13px;
+            color: var(--ink);
+            background: #fff;
+            border: 1px solid #cbd8de;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            transition: border-color 160ms ease, box-shadow 160ms ease;
+        }
+
+        /* Accessible focus outline */
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        input[type=password] {
+            padding-right: 46px;
+        }
+
+        input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(17, 122, 163, 0.13);
+        }
+
+        input[aria-invalid="true"] {
+            border-color: var(--error);
+        }
+
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            width: 34px;
+            height: 34px;
+            transform: translateY(-50%);
+            color: var(--muted);
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .toggle-password:hover {
+            background: #f0f5f7;
+        }
+
+        .field-error {
+            min-height: 17px;
+            margin: 5px 0 0;
+            color: var(--error);
+            font: 12 px Arial, sans-serif;
+        }
+
+        .row-between {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin: -2px 0 20px;
+            font: 13px Arial, sans-serif;
+        }
+
+
+        .check {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--muted);
+        }
+
+        .check input {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--brand);
+        }
+
+
+
+        a {
+            color: var(--brand-dark);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .primary-button,
+        .google-button {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            font: 700 15px Arial, sans-serif;
+            transition: transform 160ms ease, background 160ms ease, box shadow 160ms ease;
+
+        }
+
+        .primary-button {
+            color: white;
+            background: var(--brand);
+            border: 1 px solid var(--brand);
+            box-shadow: 0 7px 14px rgba(17, 122, 163, 0.25);
+        }
+
+        .primary-button:hover {
+            background: var(--brand-dark);
+            transform: translateY(-1px);
+        }
+
+        .primary-button:active {
+            transform: translateY(0);
+        }
+
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+            color: #85939b;
+            font: 13px Arial, sans-serif;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: var(--line);
+        }
+
+        .google-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            color: #536570;
+            background: white;
+            border: 1 px solid var(--line);
+
+        }
+
+        .google-button:hover {
+            background: #f7fafb;
+            border-color: #b9cbd3;
+        }
+
+        .google-icon {
+            font-weight: 700;
+            color: #4285f4;
+        }
+
+        .switch-copy {
+            margin: 24px 0 0;
+            text-align: center;
+            color: var(--muted);
+            font: 13px Arial, sans-serif;
+        }
+
+        .switch-copy a {
+            font-weight: 700;
+        }
+
+        .message {
+            display: none;
+            padding: 11px 12px;
+            margin: 16px;
+            border-radius: 7px;
+            font: 13px/1.4 Arial, sans-serif;
+        }
+
+        .message.visible {
+            display: block;
+        }
+
+        .message.error {
+            color: var(--error);
+            background: #fef2f2;
+            border: 1px solid #fac8c4;
+        }
+
+        .message.success {
+            color: var(--success);
+            background: #edf9f2;
+            border: 1px solid #b9e4c9;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 18 px;
+            font: 13px Arial, sans-serif;
+        }
+
+        @keyframes rise-in {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .google-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--ink);
+            font: 600 13px Arial, sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 18px;
+        }
+
+        .google-btn:hover {
+            background: #f8fafb;
+            border-color: #b5c5ce;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+        }
+
+        .google-btn svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .card-footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+            font: 11px/1.5 Arial, sans-serif;
+            color: var(--muted);
+        }
+
+        .card-footer a {
+            color: var(--muted);
+            text-decoration: underline;
+        }
+
+        .card-footer a:hover {
+            color: var(--brand);
+        }
+
+        .auth-provider-note {
+            margin: 12px 0 0;
+            color: var(--muted);
+            text-align: center;
+            font: 12px/1.5 Arial, sans-serif;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 34px 20px 25px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <main class="auth-shell">
+        <div class="brand"><span class="brand-mark">p</span> Project Hub</div>
+        <section class="card" aria-labelledby="page-title">
+            <h1 id="page-title">Sign up</h1>
+
+
+
+            <div class="tabs" role="tablist" aria-label="Authentication mode">
+                <button class="tab" id="login-tab" type="button" role="tab" aria-selected="true">Log in</button>
+                <button class="tab" id="signup-tab" type="button" role="tab" aria-selected="false">Sign up</button>
+            </div>
+
+            <div id="form-message" class="message" role="status" aria-live="polite"></div>
+
+            <form id="auth-form" novalidate>
+                <div class="form-group">
+                    <label for="identity" id="identity-label">Email address</label>
+                    <input id="identity" name="identity" type="email" autocomplete="email"
+                        placeholder="you@example.com" required />
+                    <p class="field-error" id="identity-error"></p>
+                </div>
+
+                <div class="form-group" id="name-group" hidden>
+                    <label for="full-name">Full name</label>
+                    <input id="full-name" name="full-name" type="text" autocomplete="name" placeholder="Your name" />
+                    <p class="field-error" id="name-error"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <input id="password" name="password" type="password" autocomplete="current-password"
+                            placeholder="Enter your password" required />
+                        <button class="toggle-password" type="button" aria-label="Show password">◉</button>
+                    </div>
+                    <p class="field-error" id="password-error"></p>
+                </div>
+
+                <div class="row-between" id="login-options">
+                    <label class="check"><input type="checkbox" name="remember" /> Remember me</label>
+                    <a href="#forgot" id="forgot-link">Forgot password?</a>
+                </div>
+
+                <button class="primary-button" type="submit" id="submit-button">Log in</button>
+            </form>
+
+            <div class="divider" id="social-divider">or</div>
+
+            <button type="button" class="google-btn" id="google-button">
+                <svg viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span id="google-button-text">Continue with Google</span>
+            </button>
+            <p class="auth-provider-note">Email/password login is secured by Supabase Auth. Google sign-in uses official Google OAuth 2.0.</p>
+
+            <p class="switch-copy" id="switch-copy">Don't have an account? <a href="#signup" id="switch-link">Sign
+                    up</a></p>
+
+            <div class="card-footer">
+                Project Hub &mdash; Internal project management tool.<br>
+                <a href="privacy.html">Privacy Policy</a> &middot; <a href="terms.html">Terms of Service</a>
+            </div>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+        // Guard: abort if Supabase CDN failed to load
+        if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+            var msg = document.getElementById('form-message');
+            if (msg) { msg.textContent = 'Auth library failed to load. Please refresh.'; msg.className = 'message visible error'; }
+            return;
+        }
+
+        // Initialise or reuse Supabase client
+        const runtimeConfig = window.getSupabaseConfig ? window.getSupabaseConfig() : (window.__PROJECT_HUB_CONFIG__ || {});
+        let db = window.db || null;
+        if (!db) {
+            try {
+                if (runtimeConfig.url && runtimeConfig.anonKey && window.supabase && typeof window.supabase.createClient === 'function') {
+                    db = window.supabase.createClient(runtimeConfig.url, runtimeConfig.anonKey, {
+                        auth: { storage: window.createSupabaseAuthStorage ? window.createSupabaseAuthStorage() : undefined }
+                    });
+                    window.db = db;
+                }
+            } catch(e) { console.warn('Supabase init failed', e); }
+        }
+
+        const elements = {
+            title: document.querySelector('#page-title'),
+            form: document.querySelector('#auth-form'),
+            identity: document.querySelector('#identity'),
+            identityLabel: document.querySelector('#identity-label'),
+            nameGroup: document.querySelector('#name-group'),
+            name: document.querySelector('#full-name'),
+            password: document.querySelector('#password'),
+            loginOptions: document.querySelector('#login-options'),
+            submit: document.querySelector('#submit-button'),
+            divider: document.querySelector('#social-divider'),
+            google: document.querySelector('#google-button'),
+            switchCopy: document.querySelector('#switch-copy'),
+            switchLink: document.querySelector('#switch-link'),
+            message: document.querySelector('#form-message'),
+            loginTab: document.querySelector('#login-tab'),
+            signupTab: document.querySelector('#signup-tab'),
+            forgot: document.querySelector('#forgot-link'),
+            googleText: document.querySelector('#google-button-text'),
+            remember: document.querySelector('input[name="remember"]')
+        };
+
+        let mode = 'login';
+
+        async function triggerGoogleAuth(targetEmail) {
+            if (!db) {
+                showMessage('Database connection offline.', 'error');
+                return;
+            }
+            clearMessage();
+            localStorage.setItem('auth_flow_mode', mode);
+            if (window.setAuthStorageMode) {
+                window.setAuthStorageMode(elements.remember ? elements.remember.checked : true);
+            }
+
+            const email = (targetEmail || elements.identity.value || '').trim();
+            const queryParams = {};
+            if (email && email.includes('@')) {
+                queryParams.login_hint = email;
+            }
+
+            try {
+                const { data, error } = await db.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/index.html`,
+                        queryParams: Object.keys(queryParams).length ? queryParams : undefined
+                    }
+                });
+                if (error) {
+                    showMessage(error.message, 'error');
+                }
+            } catch (err) {
+                console.error('OAuth error:', err);
+                showMessage(err.message || 'Google sign-in failed.', 'error');
+            }
+        }
+
+
+
+        function showMessage(text, type, action) {
+            elements.message.replaceChildren();
+            elements.message.append(document.createTextNode(text));
+            if (action && action.text && typeof action.onClick === 'function') {
+                elements.message.append(document.createTextNode(' '));
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'google-hint-btn';
+                button.textContent = action.text;
+                button.addEventListener('click', action.onClick);
+                elements.message.append(button);
+            }
+            elements.message.className = `message visible ${type}`;
+        }
+
+        function clearMessage() {
+            elements.message.replaceChildren();
+            elements.message.textContent = '';
+            elements.message.className = 'message';
+        }
+
+        function setError(input, errorId, text) {
+            input.setAttribute('aria-invalid', text ? 'true' : 'false');
+            document.querySelector(`#${errorId}`).textContent = text;
+        }
+
+        function setMode(nextMode) {
+            mode = nextMode;
+            const isSignup = mode === 'signup';
+            elements.title.textContent = isSignup ? 'Create your account' : 'Sign in';
+            elements.identityLabel.textContent = 'Email address';
+            elements.identity.placeholder = 'you@example.com';
+            elements.identity.type = 'email';
+            elements.identity.autocomplete = 'email';
+            elements.password.autocomplete = isSignup ? 'new-password' : 'current-password';
+            elements.nameGroup.hidden = !isSignup;
+            elements.loginOptions.hidden = isSignup;
+            elements.submit.textContent = isSignup ? 'Create account' : 'Log in';
+            elements.switchCopy.innerHTML = isSignup
+                ? 'Already have an account? <a href="#login" id="switch-link">Log in</a>'
+                : 'Don\'t have an account? <a href="#signup" id="switch-link">Sign up</a>';
+            elements.loginTab.setAttribute('aria-selected', String(!isSignup));
+            elements.signupTab.setAttribute('aria-selected', String(isSignup));
+            elements.switchLink = document.querySelector('#switch-link');
+            if (elements.googleText) {
+                elements.googleText.textContent = isSignup ? 'Sign up with Google' : 'Continue with Google';
+            }
+            clearMessage();
+            clearErrors();
+        }
+
+        setMode('login');
+        window.setAuthMode = setMode;
+
+        function clearErrors() {
+            setError(elements.identity, 'identity-error', '');
+            setError(elements.password, 'password-error', '');
+            setError(elements.name, 'name-error', '');
+        }
+
+        function validate() {
+            clearErrors();
+            let valid = true;
+            const idVal = elements.identity.value.trim();
+            if (!idVal) {
+                setError(elements.identity, 'identity-error', 'Enter your email address.');
+                valid = false;
+            }
+            if (idVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(idVal)) {
+                setError(elements.identity, 'identity-error', 'Enter a valid email address.');
+                valid = false;
+            }
+            if (mode === 'signup' && !elements.name.value.trim()) {
+                setError(elements.name, 'name-error', 'Enter your full name.');
+                valid = false;
+            }
+            if (!elements.password.value) {
+                setError(elements.password, 'password-error', 'Enter your password.');
+                valid = false;
+            } else if (mode === 'signup' && elements.password.value.length < 8) {
+                setError(elements.password, 'password-error', 'Use at least 8 characters.');
+                valid = false;
+            }
+            return valid;
+        }
+
+        elements.loginTab.addEventListener('click', () => setMode('login'));
+        elements.signupTab.addEventListener('click', () => setMode('signup'));
+        elements.switchCopy.addEventListener('click', (event) => {
+            if (event.target.id === 'switch-link') {
+                event.preventDefault();
+                setMode(mode === 'login' ? 'signup' : 'login');
+            }
+        });
+
+        document.querySelector('.toggle-password').addEventListener('click', (event) => {
+            const visible = elements.password.type === 'text';
+            elements.password.type = visible ? 'password' : 'text';
+            event.currentTarget.setAttribute('aria-label', visible ? 'Show password' : 'Hide password');
+            event.currentTarget.textContent = visible ? '◉' : '◎';
+        });
+
+        elements.forgot.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const email = elements.identity.value.trim().toLowerCase();
+            if (!email) {
+                showMessage('Please enter your email address above first.', 'error');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showMessage('Please enter a valid email address above.', 'error');
+                return;
+            }
+
+            const origForgotText = elements.forgot.textContent;
+            elements.forgot.textContent = 'Sending…';
+            showMessage('Sending password reset email…', 'info');
+
+            try {
+                if (!db) {
+                    throw new Error('Password reset is temporarily unavailable.');
+                }
+
+                const { error } = await db.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password.html`
+                });
+                if (error) {
+                    console.error('Password reset request error:', error);
+                    throw new Error('Could not start the password reset. Please wait and try again.');
+                }
+                showMessage('If an account exists for that email, a password reset link will be sent.', 'success');
+            } catch (err) {
+                console.error('Reset password request error:', err);
+                showMessage(err.message || 'Could not start the password reset. Please wait and try again.', 'error');
+            } finally {
+                elements.forgot.textContent = origForgotText;
+            }
+        });
+
+        elements.form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!validate()) return;
+
+            const inputVal = elements.identity.value.trim();
+            const password = elements.password.value;
+
+
+            elements.submit.disabled = true;
+            elements.submit.textContent = mode === 'signup' ? 'Creating account…' : 'Signing in…';
+            clearMessage();
+
+            try {
+                if (mode === 'signup') {
+                    const email = inputVal.toLowerCase();
+                    const fullName = elements.name.value.trim();
+                    // 1. Create the auth user
+                    let signUpData = null, signUpError = null;
+                    if (db) {
+                        try {
+                            const res = await db.auth.signUp({
+                                email,
+                                password,
+                                options: {
+                                    data: { full_name: fullName, is_registered: true },
+                                    emailRedirectTo: `${window.location.origin}/dashboard.html`
+                                }
+                            });
+                            signUpData = res.data;
+                            signUpError = res.error;
+                        } catch (err) {
+                            signUpError = err;
+                        }
+                    } else {
+                        signUpError = new Error('Database offline. Please try again later.');
+                    }
+                    if (signUpError) {
+                        const alreadyRegistered =
+                            signUpError.code === 'user_already_exists' ||
+                            /already registered|already exists/i.test(signUpError.message || '');
+                        if (alreadyRegistered) {
+                            elements.password.value = '';
+                            setMode('login');
+                            elements.identity.value = email;
+                            showMessage(
+                                'An account may already exist for this email. Sign in, use Forgot password, or continue with Google if you registered with Google.',
+                                'error'
+                            );
+                        } else {
+                            showMessage(signUpError.message, 'error');
+                        }
+                    } else {
+                        const userId = signUpData?.user?.id;
+                        if (userId) {
+                            try {
+                                localStorage.setItem('registered_user_' + userId, 'true');
+                                localStorage.setItem('cached_user_email', email);
+                                localStorage.setItem('cached_user_name', fullName);
+                            } catch(e){}
+                            // 2. Insert a row into the profiles table
+                            try {
+                                const usernameBase = (email.split('@')[0].toLowerCase()
+                                    .replace(/[^a-z0-9_]/g, '_').replace(/^_+|_+$/g, '').slice(0, 24)) || 'user';
+                                const username = usernameBase + '_' + userId.replace(/-/g, '').slice(0, 8);
+                                const { error: insertError } = await db.from('profiles').upsert([{
+                                    user_id: userId,
+                                    username,
+                                    email,
+                                    full_name: fullName,
+                                    role: 'TEAM_MEMBER'
+                                }], { onConflict: 'user_id' });
+                                if (insertError) {
+                                    console.warn('Profiles table insert notice:', insertError.message);
+                                }
+                            } catch (e) {
+                                console.warn('Profiles table insert notice:', e);
+                            }
+                        }
+                        if (signUpData?.session) {
+                            showMessage('Account created! Redirecting...', 'success');
+                            setTimeout(() => {
+                                window.location.href = 'dashboard.html';
+                            }, 800);
+                        } else {
+                            showMessage('Account created. If email confirmation is enabled on your project, check your inbox then log in.', 'success');
+                        }
+                    }
+                } else {
+                    const email = inputVal.toLowerCase();
+
+                    const rememberMe = elements.remember ? elements.remember.checked : true;
+                    if (window.setAuthStorageMode) window.setAuthStorageMode(rememberMe);
+                    const { data: signInData, error: signInError } = await (db ? db.auth.signInWithPassword({ email, password }) : Promise.reject(new Error("Supabase offline")));
+                    if (signInError) {
+                        const errorText = signInError.message || 'Incorrect email or password.';
+                        showMessage(errorText, 'error');
+                    } else {
+                        try {
+                            const name = (signInData.user?.user_metadata?.full_name || signInData.user?.user_metadata?.name) || email.split('@')[0];
+                            const userCache = rememberMe ? localStorage : sessionStorage;
+                            userCache.setItem('cached_user_email', email);
+                            userCache.setItem('cached_user_name', name);
+                            if (signInData?.user?.id) {
+                                localStorage.setItem('registered_user_' + signInData.user.id, 'true');
+                            }
+                        } catch(e){}
+                        showMessage('Signed in successfully! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 800);
+                    }
+                }
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                const msg = err?.message || String(err) || 'Something went wrong. Please try again.';
+                showMessage(msg, 'error');
+            } finally {
+                // Always re-enable the button no matter what
+                elements.submit.disabled = false;
+                elements.submit.textContent = mode === 'signup' ? 'Create account' : 'Log in';
+            }
+        });
+
+        // Google OAuth Sign In
+        if (elements.google) {
+            elements.google.addEventListener('click', () => {
+                triggerGoogleAuth(elements.identity.value.trim());
+            });
+        }
+
+        // Check if user was redirected back due to an unauthorized login attempt
+        const authError = localStorage.getItem('auth_login_error') || sessionStorage.getItem('auth_login_error');
+        if (authError) {
+            localStorage.removeItem('auth_login_error');
+            sessionStorage.removeItem('auth_login_error');
+            setMode('signup');
+            showMessage(authError, 'error');
+        } else if (window.location.hash === '#signup') {
+            setMode('signup');
+        }
+
+        // Reveal the login page immediately
+        if (typeof window.revealPage === 'function') {
+            window.revealPage();
+        }
+
+        }); // end DOMContentLoaded
+    </script>
+</body>
+
+</html>
